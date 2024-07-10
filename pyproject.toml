@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "yapyang"
+version = "0.0.1"
+description = "Yet Another PYANG"
+authors = ["a.faria <antonio.faria@nomios.co.uk>"]
+license = "Apache License 2.0"
+readme = "README.md"
+packages = [{include="yapyang"}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.2"
+pytest-cov = "^5.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
