@@ -7,6 +7,12 @@ license = "Apache License 2.0"
 readme = "README.md"
 packages = [{include="yapyang"}]
 
+[tool.ruff]
+line-length=79
+
+[tool.pytest.ini_options]
+addopts = "--cov=yapyang --cov-report term-missing -vv"
+
 [tool.poetry.dependencies]
 python = "^3.8"
 
