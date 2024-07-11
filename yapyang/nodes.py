@@ -1,5 +1,7 @@
 """This module contains YANG nodes."""
 
+import typing as t
+
 ANNOTATIONS: str = "__annotations__"
 
 
@@ -8,12 +10,11 @@ class NodeMeta(type):
     def _construct_metadata(namespace: dict, bases: tuple, /) -> None:
         """Constructs namespace metadata from type annotations."""
 
-        defaults = dict()
-        annotations = dict()
+        defaults: dict[str, t.Any] = dict()
+        annotations: dict[str, type[t.Any]] = dict()
 
         for base_metadata in [base.__metadata__ for base in bases[::-1]]:
-            if base_metadata_annotations := base_metadata[ANNOTATIONS]:
-                annotations |= base_metadata_annotations
+            annotations |= base_metadata[ANNOTATIONS]
             defaults |= base_metadata
 
         if namespace_annotations := namespace.pop(ANNOTATIONS, None):
@@ -25,11 +26,11 @@ class NodeMeta(type):
         defaults[ANNOTATIONS] = annotations
         namespace["__metadata__"] = defaults
 
-    def __new__(meta_cls, cls_name: str, bases: tuple, namespace: dict):
+    def __new__(cls, cls_name: str, bases: tuple, namespace: dict):
         """Converts type annotated class attributes to instance."""
 
-        meta_cls._construct_metadata(namespace, bases)
-        return super().__new__(meta_cls, cls_name, bases, namespace)
+        cls._construct_metadata(namespace, bases)
+        return super().__new__(cls, cls_name, bases, namespace)
 
 
 class Node(metaclass=NodeMeta):
