@@ -1,4 +1,4 @@
-"""This module contains unit tests for NodeMeta."""
+"""This module contains unit tests for nodes NodeMeta."""
 
 from unittest.mock import Mock
 
