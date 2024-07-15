@@ -1,4 +1,4 @@
-"""This module contains tests for nodes Node."""
+"""This module contains functional tests for nodes Node."""
 
 import pytest
 
