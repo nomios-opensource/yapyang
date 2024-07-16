@@ -42,6 +42,33 @@ class Node(metaclass=NodeMeta):
 
     identifier: t.Optional[str] = None
 
+    def __init__(self, *args: tuple, **kwargs: dict) -> None:
+        """Initializer that takes any number of arguments for annotated
+        class attributes."""
+
+        cls_metadata: dict[str, t.Any] = self.__class__.__metadata__
+
+        # Checks that number of args and kwargs does not exceed the
+        # number of annotated class attributes.
+        if (got := len(args) + len(kwargs)) > (
+            expected := len(cls_metadata[ANNOTATIONS])
+        ):
+            raise TypeError(
+                f"{self.__class__.__name__} takes {expected} arguments, but {got} were given."
+            )
+
+        for index, attr in enumerate(cls_metadata[ANNOTATIONS]):
+            if len(args) > index:
+                value = args[index]
+            elif attr in kwargs:
+                value = kwargs[attr]
+            elif attr in cls_metadata:
+                value = cls_metadata[attr]
+            else:
+                raise TypeError(f"Missing required argument: {attr}")
+
+            setattr(self, attr, value)
+
     def __new__(cls, *args: tuple, **kwargs: dict):
         """Prevents instances of Node or direct subclasses."""
 
@@ -57,53 +84,18 @@ class ModuleNode(Node):
 
     namespace: t.Optional[str] = None
 
-    def __init__(self, *args, **kwargs) -> None:
-        """Initializer that takes any number of arguments for annotated
-        class attributes."""
-
-        cls_metadata: dict[str, t.Any] = self.__class__.__metadata__  # type: ignore
-
-        # Checks that number of args and kwargs does not exceed the
-        # number of annotated class attributes.
-        if (got := len(args) + len(kwargs)) > (
-            expected := len(cls_metadata[ANNOTATIONS])
-        ):
-            raise TypeError(
-                f"{self.__class__.__name__} takes {expected} arguments, but {got} were given."
-            )
-
-        for index, (name, annotation) in enumerate(
-            cls_metadata[ANNOTATIONS].items()
-        ):
-            if len(args) > index:
-                setattr(self, name, args[index])
-            elif name in kwargs:
-                setattr(self, name, kwargs[name])
-            elif name in cls_metadata:
-                setattr(self, name, cls_metadata[name])
-            else:
-                raise TypeError(f"Missing required argument: {name} ")
-
 
 class ContainerNode(Node):
     """Base class for YANG container node."""
-
-    pass
 
 
 class ListNode(Node):
     """Base class for YANG list node."""
 
-    pass
-
 
 class LeafListNode(Node):
     """Base class for YANG leaf list node."""
 
-    pass
-
 
 class LeafNode(Node):
     """Base class for YANG leaf node."""
-
-    pass
