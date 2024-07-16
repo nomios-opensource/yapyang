@@ -69,8 +69,7 @@ class ModuleNode(Node):
             expected := len(cls_metadata[ANNOTATIONS])
         ):
             raise TypeError(
-                f"{self.__class__.__name__} takes {expected} arguments, \
-                    but {got} were given."
+                f"{self.__class__.__name__} takes {expected} arguments, but {got} were given."
             )
 
         for index, (name, annotation) in enumerate(
