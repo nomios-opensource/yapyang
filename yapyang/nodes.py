@@ -2,6 +2,8 @@
 
 import typing as t
 
+from ordered_set import OrderedSet
+
 ANNOTATIONS: str = "__annotations__"
 
 
@@ -89,8 +91,61 @@ class ContainerNode(Node):
     """Base class for YANG container node."""
 
 
+class ListEntry:
+    """Base class for YANG list node entry."""
+
+    def __init__(self, attributes: dict[str, t.Any], /, *, key: str) -> None:
+        """Initializer that manifests into entry through attributes."""
+
+        self.__dict__ |= attributes
+        self._key = key
+
+    def __hash__(self):
+        """Returns hash of entry from key values."""
+
+        return hash(
+            tuple((self.__dict__[key] for key in self._key.split(",")))
+        )
+
+
 class ListNode(Node):
     """Base class for YANG list node."""
+
+    key: str
+
+    def __init__(self) -> None:
+        self.entries: OrderedSet = OrderedSet()
+        self._cls_metadata = self.__class__.__metadata__
+        self._key = self._cls_metadata["key"]
+
+    def append(self, *args, **kwargs) -> None:
+        """Takes any number of arguments for annotated class attributes
+        to append a new entry into list entries.
+        """
+
+        # Checks that number of args and kwargs does not exceed the
+        # number of annotated class attributes.
+        if (got := len(args) + len(kwargs)) > (
+            expected := len(list(self._cls_metadata[ANNOTATIONS])[2:])
+        ):
+            raise TypeError(
+                f"{self.__class__.__name__} takes {expected} arguments, but {got} were given."
+            )
+
+        entry_attr: dict[str, t.Any] = dict()
+        for index, attr in enumerate(
+            list(self._cls_metadata[ANNOTATIONS])[2:]
+        ):
+            if len(args) > index:
+                value = args[index]
+            elif attr in kwargs:
+                value = kwargs[attr]
+            elif attr in self._cls_metadata:
+                value = self._cls_metadata[attr]
+            else:
+                raise TypeError(f"Missing required argument: {attr}")
+            entry_attr[attr] = value
+        self.entries.add(ListEntry(entry_attr, key=self._key))
 
 
 class LeafListNode(Node):

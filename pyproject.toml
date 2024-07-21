@@ -15,6 +15,7 @@ addopts = "--cov=yapyang --cov-report term-missing -vv"
 
 [tool.poetry.dependencies]
 python = "^3.8"
+ordered-set = "^4.1.0"
 
 
 [tool.poetry.group.dev.dependencies]
