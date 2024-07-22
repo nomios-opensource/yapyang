@@ -1,4 +1,4 @@
-"""This module contains functional tests for list node."""
+"""This module contains functional tests for nodes ListNode."""
 
 import pytest
 from ordered_set import OrderedSet
@@ -9,7 +9,7 @@ from yapyang.nodes import ListNode
 class MockListNode(ListNode):
     """Represents subclass of ListNode."""
 
-    key: str = "name"
+    __key__: str = "name"
     name: str = "cisco"
 
 

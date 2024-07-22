@@ -6,6 +6,9 @@ import string
 
 from yapyang.nodes import Node
 
+ARGS: str = "__args__"
+DEFAULTS: str = "__defaults__"
+
 
 class ModuleNode(Node):
     """Represents a subclass of Node."""
@@ -13,6 +16,8 @@ class ModuleNode(Node):
 
 class MockModule(ModuleNode):
     """Represents a subclass of ModuleNode."""
+
+    namespace: str = "cisco"
 
 
 def test_when_node_instantiated_then_exception_is_raised():
@@ -58,12 +63,10 @@ def test_given_subclass_of_node_subclass_when_instantiated_with_args_then_args_a
     """Test given subclass of node subclass when instantiated with args then args are assigned in order of annotated cls attributes."""
 
     # Given MockModule annotated cls attributes.
-    cls_attributes = MockModule.__metadata__["__annotations__"]
+    cls_attributes = MockModule.__meta__[ARGS]
 
     # Given args.
-    args = [
-        random.choice(string.ascii_letters) for attribute in cls_attributes
-    ]
+    args = [random.choice(string.ascii_letters) for _ in cls_attributes]
 
     # When MockModule is instantiated with args.
     module = MockModule(*args)
@@ -77,7 +80,7 @@ def test_given_subclass_of_node_subclass_when_instantiated_with_kwargs_then_kwar
     """Test given subclass of node subclass when instantiated with kwargs then kwargs are assigned for annotated cls attributes."""
 
     # Given MockModule annotated cls attributes.
-    cls_attributes = MockModule.__metadata__["__annotations__"]
+    cls_attributes = MockModule.__meta__[ARGS]
 
     # Given kwargs.
     kwargs = {
@@ -96,7 +99,7 @@ def test_given_subclass_of_node_subclass_when_instantiated_without_args_or_kwarg
     """Test given subclass of node subclass when instantiated without args or kwargs then defaults are assigned for annotated cls attributes."""
 
     # Given MockModule annotated cls attributes.
-    cls_attributes = MockModule.__metadata__["__annotations__"]
+    cls_attributes = MockModule.__meta__[ARGS]
 
     # When MockModule is instantiated without args or kwargs.
     module = MockModule()
@@ -105,7 +108,7 @@ def test_given_subclass_of_node_subclass_when_instantiated_without_args_or_kwarg
     for cls_attribute in cls_attributes:
         assert (
             getattr(module, cls_attribute)
-            is MockModule.__metadata__[cls_attribute]
+            is MockModule.__meta__[DEFAULTS][cls_attribute]
         )
 
 
@@ -113,7 +116,7 @@ def test_given_subclass_of_node_subclass_when_instantiated_with_too_many_args_or
     """Test given subclass of node subclass when instantiated with too many args or kwargs then exception is raised."""
 
     # Given MockModule annotated cls attributes.
-    cls_attributes = MockModule.__metadata__["__annotations__"]
+    cls_attributes = MockModule.__meta__[ARGS]
 
     # Given too many args
     args = [
@@ -142,7 +145,7 @@ def test_given_subclass_of_node_subclass_when_instantiated_with_too_few_args_or_
     # Given too few args (for MockModule)
     args = [
         random.choice(string.ascii_letters)
-        for attribute in MockModule.__metadata__["__annotations__"]
+        for attribute in MockModule.__meta__[ARGS]
     ]
 
     # When RevisionMockModule is instantiated with args.
