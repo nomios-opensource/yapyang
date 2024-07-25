@@ -1,12 +1,21 @@
 """This module contains functional tests for nodes ContainerNode."""
 
 from yapyang.nodes import ContainerNode
+from yapyang.utils import MetaInfo
 
 
 class Interfaces(ContainerNode):
     """Represents a subclass of ContainerNode."""
 
     __identifier__: str = "interfaces"
+
+
+class System(ContainerNode):
+    """Represents a subclass of ContainerNode."""
+
+    __identifier__: str = "system"
+
+    interfaces: Interfaces = Interfaces()
 
 
 def test_given_instance_of_container_node_subclass_when_to_xml_is_called_then_instance_xml_element_returned():
@@ -33,17 +42,50 @@ def test_given_instance_of_container_node_subclass_when_to_xml_is_called_with_at
     assert xml == '<interfaces nc:operation="delete"></interfaces>'
 
 
-def test_given_instance_of_container_node_subclass_with_inner_nodes_when_to_xml_is_called_then_xml_tree_from_instance_xml_element_returned():
-    """Test given instance of container node subclass with inner nodes when to xml is called then xml tree from instance xml element returned."""
+def test_given_instance_of_container_node_subclass_with_child_nodes_when_to_xml_is_called_then_xml_tree_from_instance_xml_element_returned():
+    """Test given instance of container node subclass with child nodes when to xml is called then xml tree from instance xml element returned."""
 
-    # Given instance of ContainerNode subclass with inner node.
-    class System(ContainerNode):
-        __identifier__: str = "system"
-
-        interfaces: Interfaces
+    # Given instance of ContainerNode subclass with child node.
 
     # When to_xml is called.
-    xml = System(Interfaces()).to_xml()
+    xml = System().to_xml()
+
+    # Then XML tree from instance XML element returned.
+    assert xml == "<system><interfaces></interfaces></system>"
+
+
+def test_given_instance_of_container_node_subclass_with_child_nodes_given_child_nodes_have_meta_info_default_with_attrs_when_to_xml_is_called_then_child_node_xml_elements_contain_attrs():
+    """Test given instance of container node subclass with child nodes given child nodes have meta info default with attrs when to xml is called then child node xml elements contain attrs."""
+
+    # Given instance of ContainerNode subclass with child nodes.
+    # Given child nodes have MetaInfo default with attrs.
+    class Override(System):
+        """Represents a subclass of ContainerNode."""
+
+        interfaces: Interfaces = MetaInfo(attrs={"nc:operation": "delete"})
+
+    # When to_xml is called.
+    xml = Override(Interfaces()).to_xml()
+
+    # Then child node XML element contain attrs.
+    assert (
+        xml
+        == '<system><interfaces nc:operation="delete"></interfaces></system>'
+    )
+
+
+def test_given_instance_of_container_node_subclass_with_child_nodes_given_child_nodes_have_meta_info_default_without_attrs_when_to_xml_is_called_then_xml_tree_from_instance_xml_element_returned():
+    """Test given instance of container node subclass with child nodes given child nodes have meta info default without attrs when to xml is called then xml tree from instance xml element returned."""
+
+    # Given instance of ContainerNode subclass with child nodes.
+    # Given child nodes have MetaInfo default without attrs.
+    class Override(System):
+        """Represents a subclass of ContainerNode."""
+
+        interfaces: Interfaces = MetaInfo()
+
+    # When to_xml is called.
+    xml = Override(Interfaces()).to_xml()
 
     # Then XML tree from instance XML element returned.
     assert xml == "<system><interfaces></interfaces></system>"

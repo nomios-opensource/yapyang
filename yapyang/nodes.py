@@ -3,15 +3,13 @@
 import typing as t
 
 from ordered_set import OrderedSet
-from yapyang.utils import concatenate_xml_element_attrs
 
-
-ANNOTATIONS: str = "__annotations__"
-META: str = "__meta__"
-ARGS: str = "__args__"
-DEFAULTS: str = "__defaults__"
-
-XML_ELEMENT_TEMPLATE: str = "<{0}{1}>{2}</{0}>"
+from yapyang.constants import ANNOTATIONS, ARGS, DEFAULTS, XML_ELEMENT_TEMPLATE
+from yapyang.utils import (
+    MetaInfo,
+    concatenate_xml_element_attrs,
+    retrieve_xml_element_attrs,
+)
 
 
 class NodeMeta(type):
@@ -64,7 +62,7 @@ class Node(metaclass=NodeMeta):
         args."""
 
         self._cls_meta: dict[str, t.Any] = self.__class__.__meta__  # type: ignore
-        self._identifier: str = self._cls_meta[DEFAULTS]["__identifier__"]
+        self._cls_identifier: str = self._cls_meta[DEFAULTS]["__identifier__"]
 
         # Checks that number of args and kwargs does not exceed the
         # number of class meta args.
@@ -75,17 +73,22 @@ class Node(metaclass=NodeMeta):
                 f"{self.__class__.__name__} takes {expected} arguments, but {got} were given."
             )
 
-        for index, attr in enumerate(self._cls_meta[ARGS]):
+        for index, cls_arg in enumerate(self._cls_meta[ARGS]):
             if len(args) > index:
                 value = args[index]
-            elif attr in kwargs:
-                value = kwargs[attr]
-            elif attr in self._cls_meta[DEFAULTS]:
-                value = self._cls_meta[DEFAULTS][attr]
-            else:
-                raise TypeError(f"Missing required argument: {attr}")
+            elif cls_arg in kwargs:
+                value = kwargs[cls_arg]
+            elif cls_arg in self._cls_meta[DEFAULTS]:
+                if (
+                    type((value := self._cls_meta[DEFAULTS][cls_arg]))
+                    is MetaInfo
+                ):
+                    value = value.default
 
-            setattr(self, attr, value)
+            else:
+                raise TypeError(f"Missing required argument: {cls_arg}")
+
+            setattr(self, cls_arg, value)
 
     def __new__(cls, *args, **kwargs):
         """Prevents instances of Node or direct subclasses."""
@@ -106,9 +109,13 @@ class ModuleNode(Node):
         """Returns an XML tree from instance."""
 
         xml_tree: str = ""
-        attrs: dict = dict(xmlns=self._cls_meta[DEFAULTS]["__namespace__"])
-        for c_arg in self._cls_meta[ARGS]:
-            xml_tree += getattr(self, c_arg).to_xml(attrs=attrs)
+        for cls_arg in self._cls_meta[ARGS]:
+            attrs: dict = dict(xmlns=self._cls_meta[DEFAULTS]["__namespace__"])
+            if element_attrs := retrieve_xml_element_attrs(
+                self._cls_meta, cls_arg
+            ):
+                attrs |= element_attrs
+            xml_tree += getattr(self, cls_arg).to_xml(attrs=attrs)
 
         return xml_tree
 
@@ -122,11 +129,13 @@ class ContainerNode(Node):
 
         element_attrs = concatenate_xml_element_attrs(attrs)
         element_value: str = ""
-        for c_arg in self._cls_meta[ARGS]:
-            element_value += getattr(self, c_arg).to_xml()
+        for cls_arg in self._cls_meta[ARGS]:
+            element_value += getattr(self, cls_arg).to_xml(
+                attrs=retrieve_xml_element_attrs(self._cls_meta, cls_arg)
+            )
 
         return XML_ELEMENT_TEMPLATE.format(
-            self._identifier, element_attrs, element_value
+            self._cls_identifier, element_attrs, element_value
         )
 
 
@@ -154,8 +163,9 @@ class ListNode(Node):
 
     def __init__(self) -> None:
         self.entries: OrderedSet = OrderedSet()
+
         self._cls_meta = self.__class__.__meta__  # type: ignore
-        self._identifier: str = self._cls_meta[DEFAULTS]["__identifier__"]
+        self._cls_identifier: str = self._cls_meta[DEFAULTS]["__identifier__"]
         self._key = self._cls_meta[DEFAULTS]["__key__"]
 
     def append(self, *args, **kwargs) -> None:
@@ -173,16 +183,20 @@ class ListNode(Node):
             )
 
         entry_attr: dict[str, t.Any] = dict()
-        for index, attr in enumerate(self._cls_meta[ARGS]):
+        for index, cls_arg in enumerate(self._cls_meta[ARGS]):
             if len(args) > index:
                 value = args[index]
-            elif attr in kwargs:
-                value = kwargs[attr]
-            elif attr in self._cls_meta[DEFAULTS]:
-                value = self._cls_meta[DEFAULTS][attr]
+            elif cls_arg in kwargs:
+                value = kwargs[cls_arg]
+            elif cls_arg in self._cls_meta[DEFAULTS]:
+                if (
+                    type((value := self._cls_meta[DEFAULTS][cls_arg]))
+                    is MetaInfo
+                ):
+                    value = value.default
             else:
-                raise TypeError(f"Missing required argument: {attr}")
-            entry_attr[attr] = value
+                raise TypeError(f"Missing required argument: {cls_arg}")
+            entry_attr[cls_arg] = value
         self.entries.add(ListEntry(entry_attr, key=self._key))
 
     def to_xml(self, /, *, attrs: t.Optional[dict[str, str]] = None) -> str:
@@ -193,10 +207,12 @@ class ListNode(Node):
         xml_tree: str = ""
         for entry in self.entries:
             element_value: str = ""
-            for c_arg in self._cls_meta[ARGS]:
-                element_value += getattr(entry, c_arg).to_xml()
+            for cls_arg in self._cls_meta[ARGS]:
+                element_value += getattr(entry, cls_arg).to_xml(
+                    attrs=retrieve_xml_element_attrs(self._cls_meta, cls_arg)
+                )
             xml_tree += XML_ELEMENT_TEMPLATE.format(
-                self._identifier, element_attrs, element_value
+                self._cls_identifier, element_attrs, element_value
             )
 
         return xml_tree
@@ -209,13 +225,15 @@ class LeafListNode(Node):
 class LeafNode(Node):
     """Base class for YANG leaf node."""
 
+    value: t.Any
+
     def to_xml(self, /, *, attrs: t.Optional[dict[str, str]] = None) -> str:
         """Returns XML from instance element. When attrs are
         provided instance element contains attrs."""
 
         element_attrs = concatenate_xml_element_attrs(attrs)
         return XML_ELEMENT_TEMPLATE.format(
-            self._identifier,
+            self._cls_identifier,
             element_attrs,
             getattr(self, *self._cls_meta[ARGS].keys()),
         )
