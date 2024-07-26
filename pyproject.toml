@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "yapyang"
 version = "0.0.1"
-description = "Yet Another PYANG"
+description = "An open source Python package that helps developers to translate YANG (RFC6020/RFC7950) data models to Python."
 authors = ["a.faria <antonio.faria@nomios.co.uk>"]
 license = "Apache License 2.0"
 readme = "README.md"
@@ -16,7 +16,6 @@ addopts = "--cov=yapyang --cov-report term-missing -vv"
 [tool.poetry.dependencies]
 python = "^3.8"
 ordered-set = "^4.1.0"
-
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.2"
