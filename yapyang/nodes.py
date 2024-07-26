@@ -1,4 +1,18 @@
-"""This module contains YANG nodes."""
+"""
+Copyright 2024 Nomios UK&I
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
 
 import typing as t
 
@@ -11,6 +25,14 @@ from yapyang.utils import (
     retrieve_xml_element_attrs,
 )
 
+__all__ = (
+    "ModuleNode",
+    "ContainerNode",
+    "ListNode",
+    "LeafListNode",
+    "LeafNode",
+)
+
 
 class NodeMeta(type):
     """Metaclass for all YANG nodes."""
@@ -19,15 +41,15 @@ class NodeMeta(type):
     def _construct_meta(namespace: dict, bases: tuple, /) -> None:
         """Constructs namespace metadata from type annotations."""
 
-        metadata: dict[str, t.Any] = dict()
-        args: dict[str, type[t.Any]] = dict()
-        defaults: dict[str, t.Any] = dict()
+        metadata: t.Dict[str, t.Any] = dict()
+        args: t.Dict[str, t.Type[t.Any]] = dict()
+        defaults: t.Dict[str, t.Any] = dict()
 
         # Inherit from parents (bases) meta.
         for base_meta in [base.__meta__ for base in bases[::-1]]:
-            metadata |= base_meta
-            args |= base_meta[ARGS]
-            defaults |= base_meta[DEFAULTS]
+            metadata.update(base_meta)
+            args.update(base_meta[ARGS])
+            defaults.update(base_meta[DEFAULTS])
 
         # Override parents (bases) meta with namespace.
         if namespace_annotations := namespace.pop(ANNOTATIONS, None):
@@ -61,7 +83,7 @@ class Node(metaclass=NodeMeta):
         """Initializer that takes any number of arguments for class meta
         args."""
 
-        self._cls_meta: dict[str, t.Any] = self.__class__.__meta__  # type: ignore
+        self._cls_meta: t.Dict[str, t.Any] = self.__class__.__meta__  # type: ignore
         self._cls_identifier: str = self._cls_meta[DEFAULTS]["__identifier__"]
 
         # Checks that number of args and kwargs does not exceed the
@@ -114,7 +136,7 @@ class ModuleNode(Node):
             if element_attrs := retrieve_xml_element_attrs(
                 self._cls_meta, cls_arg
             ):
-                attrs |= element_attrs
+                attrs.update(element_attrs)
             xml_tree += getattr(self, cls_arg).to_xml(attrs=attrs)
 
         return xml_tree
@@ -123,7 +145,7 @@ class ModuleNode(Node):
 class ContainerNode(Node):
     """Base class for YANG container node."""
 
-    def to_xml(self, /, *, attrs: t.Optional[dict[str, str]] = None) -> str:
+    def to_xml(self, /, *, attrs: t.Optional[t.Dict[str, str]] = None) -> str:
         """Returns an XML tree from instance element. When attrs are
         provided instance element contains attrs."""
 
@@ -142,10 +164,10 @@ class ContainerNode(Node):
 class ListEntry:
     """Base class for YANG list node entry."""
 
-    def __init__(self, attributes: dict[str, t.Any], /, *, key: str) -> None:
+    def __init__(self, attributes: t.Dict[str, t.Any], /, *, key: str) -> None:
         """Initializer that manifests into entry through attributes."""
 
-        self.__dict__ |= attributes
+        self.__dict__.update(attributes)
         self._key = key
 
     def __hash__(self):
@@ -164,9 +186,9 @@ class ListNode(Node):
     def __init__(self) -> None:
         self.entries: OrderedSet = OrderedSet()
 
-        self._cls_meta = self.__class__.__meta__  # type: ignore
+        self._cls_meta: t.Dict[str, t.Any] = self.__class__.__meta__  # type: ignore
         self._cls_identifier: str = self._cls_meta[DEFAULTS]["__identifier__"]
-        self._key = self._cls_meta[DEFAULTS]["__key__"]
+        self._key: str = self._cls_meta[DEFAULTS]["__key__"]
 
     def append(self, *args, **kwargs) -> None:
         """Takes any number of arguments for class meta args to append a
@@ -182,7 +204,7 @@ class ListNode(Node):
                 f"{self.__class__.__name__} takes {expected} arguments, but {got} were given."
             )
 
-        entry_attr: dict[str, t.Any] = dict()
+        entry_attr: t.Dict[str, t.Any] = dict()
         for index, cls_arg in enumerate(self._cls_meta[ARGS]):
             if len(args) > index:
                 value = args[index]
@@ -199,7 +221,7 @@ class ListNode(Node):
             entry_attr[cls_arg] = value
         self.entries.add(ListEntry(entry_attr, key=self._key))
 
-    def to_xml(self, /, *, attrs: t.Optional[dict[str, str]] = None) -> str:
+    def to_xml(self, /, *, attrs: t.Optional[t.Dict[str, str]] = None) -> str:
         """Returns an XML tree from each entries element. When attrs are
         provided each entry element contains attrs."""
 
@@ -227,7 +249,7 @@ class LeafNode(Node):
 
     value: t.Any
 
-    def to_xml(self, /, *, attrs: t.Optional[dict[str, str]] = None) -> str:
+    def to_xml(self, /, *, attrs: t.Optional[t.Dict[str, str]] = None) -> str:
         """Returns XML from instance element. When attrs are
         provided instance element contains attrs."""
 
