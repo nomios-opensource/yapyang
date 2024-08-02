@@ -1,10 +1,18 @@
 # Yet Another PYANG
+
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/nomios-opensource/yapyang/publish.yml)
+![Codecov](https://img.shields.io/codecov/c/github/nomios-opensource/yapyang)  
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/yapyang)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/yapyang)
+![GitHub License](https://img.shields.io/github/license/nomios-opensource/yapyang)
+
 An open source Python package that helps developers to translate YANG (RFC6020/RFC7950) data models to Python. YAPYANG mimics the functionality of YANG data structures, enforces types through annotations, and supports JSON/XML ser/des. YAPYANG is authored by [Antonio Faria](https://github.com/movedempackets), governed as a [benevolent dictatorship](CODE_OF_CONDUCT.md), and distributed under [license](LICENSE)
 
 > [!WARNING]
 > YAPYANG is in construction, during this time no effort shall be afforded to migrations and backwards compatibility. See [versioning](#versioning).
 
 ## Quick Start
+
 For convenience we've included a basic quick start below. Ensure that a supported version of [Python](https://devguide.python.org/versions/) and the latest version of [YAPYANG](https://github.com/nomios-opensource/yapyang/releases/latest) is installed.
 
 Start by choosing the YANG model to translate. We've simplified OpenConfig interfaces.
@@ -22,6 +30,7 @@ module openconfig-interfaces {
     }
 }
 ```
+
 For each YANG node (module, container, list, and leaf) in the YANG model translate it into Python with YAPYANG through subclasses of the provided node types.
 
 ```py
@@ -51,6 +60,7 @@ class OpenConfigInterfaces(ModuleNode):
 
     interfaces: Interfaces
 ```
+
 Create instances of the translated YANG model nodes, add interface entries, and serialize to XML. Read the full [docs]().
 
 ```py
@@ -65,10 +75,13 @@ print(module.to_xml())
 ```
 
 ## Versioning
+
 Releases will follow semantic versioning (major.minor.patch). Before 1.0.0 breaking changes can be included in a minor release, therefore we highly recommend pinning this package.
 
 ## Contributing
+
 Suggest a [feature]() or report a [bug](). Read our developer [guide](CONTRIBUTING.md).
 
 ## License
+
 YAPYANG is distributed under the Apache 2.0 [license](LICENSE).
