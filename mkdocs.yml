@@ -1,0 +1,60 @@
+site_name: YAPYANG
+site_url: https://nomios-opensource.github.io/yapyang/
+site_description: An open source Python package that helps developers to translate YANG (RFC6020/RFC7950) data models to Python.
+site_author: Nomios UK&I
+copyright: Copyright 2024 Nomios UK&I
+repo_name: nomios-opensource/yapyang
+repo_url: https://github.com/nomios-opensource/yapyang
+theme:
+  name: material
+  language: en
+  logo: assets/logo.svg
+  favicon: assets/favicon.jpeg
+  icon:
+    repo: fontawesome/brands/github
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: white
+      accent: light blue
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: light blue
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.tabs
+    - navigation.path
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+extra:
+  version:
+    provider: mike
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/nomios-opensource
+      name: Collection of Nomios opensource repositories
+    - icon: simple/python
+      link: https://pypi.org/user/nomios-opensource/
+      name: Collection of Nomios opensource packages
+    - icon: material/web
+      link: https://www.nomios.co.uk/network/network-automation/
+      name: Talk to an expert
+markdown_extensions:
+  - attr_list
+  - md_in_html
+  - pymdownx.superfences
+  - admonition
+  - pymdownx.details
+nav:
+  - Quick Start:
+      - Introduction: index.md
+      - Installation: install.md
