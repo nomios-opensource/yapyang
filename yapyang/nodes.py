@@ -85,16 +85,27 @@ class Node(metaclass=NodeMeta):
 
         self._cls_meta: t.Dict[str, t.Any] = self.__class__.__meta__  # type: ignore
         self._cls_identifier: str = self._cls_meta[DEFAULTS]["__identifier__"]
+        for cls_arg, value in self._cls_meta_args_resolver(args, kwargs):
+            setattr(self, cls_arg, value)
 
-        # Checks that number of args and kwargs does not exceed the
-        # number of class meta args.
-        if (got := len(args) + len(kwargs)) > (
-            expected := len(self._cls_meta[ARGS])
-        ):
+    def __new__(cls, *args, **kwargs):
+        """Prevents instances of Node or direct subclasses."""
+
+        if cls is Node or cls in Node.__subclasses__():
             raise TypeError(
-                f"{self.__class__.__name__} takes {expected} arguments, but {got} were given."
+                "Node or subclasses of cannot be directly instantiated."
             )
+        return super().__new__(cls)
 
+    def _cls_meta_args_resolver(
+        self, args: tuple, kwargs: dict
+    ) -> t.Generator[t.Tuple[str, t.Any], None, None]:
+        """Yields the name and resolved value for each class meta
+        argument."""
+
+        self._check_given_args_not_greater_than_expected(
+            (len(args) + len(kwargs))
+        )
         for index, cls_arg in enumerate(self._cls_meta[ARGS]):
             if len(args) > index:
                 value = args[index]
@@ -106,20 +117,18 @@ class Node(metaclass=NodeMeta):
                     is MetaInfo
                 ):
                     value = value.default
-
             else:
                 raise TypeError(f"Missing required argument: {cls_arg}")
+            yield (cls_arg, value)
 
-            setattr(self, cls_arg, value)
+    def _check_given_args_not_greater_than_expected(self, given: int) -> None:
+        """Checks the number of given arguments does not exceed the
+        number of class meta arguments."""
 
-    def __new__(cls, *args, **kwargs):
-        """Prevents instances of Node or direct subclasses."""
-
-        if cls is Node or cls in Node.__subclasses__():
+        if given > (expected := len(self._cls_meta[ARGS])):
             raise TypeError(
-                "Node or subclasses of cannot be directly instantiated."
+                f"{self.__class__.__name__} takes {expected} arguments, but {given} were given."
             )
-        return super().__new__(cls)
 
 
 class ModuleNode(Node):
@@ -184,6 +193,8 @@ class ListNode(Node):
     __key__: str
 
     def __init__(self) -> None:
+        """Initializer that creates the mechanics for expected behavior."""
+
         self.entries: OrderedSet = OrderedSet()
 
         self._cls_meta: t.Dict[str, t.Any] = self.__class__.__meta__  # type: ignore
@@ -195,29 +206,8 @@ class ListNode(Node):
         new entry into list entries.
         """
 
-        # Checks that number of args and kwargs does not exceed the
-        # number of class meta args.
-        if (got := len(args) + len(kwargs)) > (
-            expected := len(self._cls_meta[ARGS])
-        ):
-            raise TypeError(
-                f"{self.__class__.__name__} takes {expected} arguments, but {got} were given."
-            )
-
         entry_attr: t.Dict[str, t.Any] = dict()
-        for index, cls_arg in enumerate(self._cls_meta[ARGS]):
-            if len(args) > index:
-                value = args[index]
-            elif cls_arg in kwargs:
-                value = kwargs[cls_arg]
-            elif cls_arg in self._cls_meta[DEFAULTS]:
-                if (
-                    type((value := self._cls_meta[DEFAULTS][cls_arg]))
-                    is MetaInfo
-                ):
-                    value = value.default
-            else:
-                raise TypeError(f"Missing required argument: {cls_arg}")
+        for cls_arg, value in super()._cls_meta_args_resolver(args, kwargs):
             entry_attr[cls_arg] = value
         self.entries.add(ListEntry(entry_attr, key=self._key))
 
@@ -242,6 +232,37 @@ class ListNode(Node):
 
 class LeafListNode(Node):
     """Base class for YANG leaf list node."""
+
+    value: t.Any
+
+    def __init__(self) -> None:
+        """Initializer that creates the mechanics for expected behavior."""
+
+        self.entries: OrderedSet = OrderedSet()
+
+        self._cls_meta: dict[str, t.Any] = self.__class__.__meta__  # type: ignore
+        self._cls_identifier: str = self._cls_meta[DEFAULTS]["__identifier__"]
+
+    def append(self, *value) -> None:
+        """Takes a single ;) value argument to append a new entry into leaf
+        list entries.
+        """
+
+        for _, value in super()._cls_meta_args_resolver(value, dict()):
+            self.entries.add(value)
+
+    def to_xml(self, /, *, attrs: t.Optional[t.Dict[str, str]] = None) -> str:
+        """Returns XML element for each entry. When attrs are provided
+        each entry element contains attrs."""
+
+        element_attrs = concatenate_xml_element_attrs(attrs)
+        elements: str = ""
+        for element_value in self.entries:
+            elements += XML_ELEMENT_TEMPLATE.format(
+                self._cls_identifier, element_attrs, element_value
+            )
+
+        return elements
 
 
 class LeafNode(Node):
