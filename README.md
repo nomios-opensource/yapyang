@@ -34,6 +34,7 @@ module openconfig-interfaces {
 For each YANG node (module, container, list, and leaf) in the YANG model translate it into Python with YAPYANG through subclasses of the provided node types.
 
 ```py
+
 from yapyang import *
 
 class Name(LeafNode):
@@ -42,7 +43,6 @@ class Name(LeafNode):
     value: str
 
 class Interface(ListNode):
-
     __identifier__ = "interface"
     __key__ = "name"
 
@@ -54,7 +54,6 @@ class Interfaces(ContainerNode):
     interface: Interface
 
 class OpenConfigInterfaces(ModuleNode):
-
     __identifier__ = "openconfig-interfaces"
     __namespace__ = "http://openconfig.net/yang/interfaces"
 
