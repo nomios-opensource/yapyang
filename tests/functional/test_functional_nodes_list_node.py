@@ -15,16 +15,13 @@ class Name(LeafNode):
     value: str
 
 
-DEFAULT = Name("xe-0/0/0")
-
-
 class Interface(ListNode):
     """Represents a subclass of ListNode."""
 
     __identifier__: str = "interface"
     __key__: str = "name"
 
-    name: Name = DEFAULT
+    name: Name
 
 
 def test_given_subclass_of_list_node_when_instantiated_then_entries_attribute_created():
@@ -33,85 +30,94 @@ def test_given_subclass_of_list_node_when_instantiated_then_entries_attribute_cr
     # Given subclass of ListNode.
 
     # When instantiated.
-    mock_list = Interface()
+    interface = Interface()
 
     # Then entries attribute created.
-    assert "entries" in mock_list.__dict__
-    assert isinstance(mock_list.entries, OrderedSet)
+    assert "entries" in interface.__dict__
+    assert isinstance(interface.entries, OrderedSet)
 
 
 def test_given_instance_of_list_node_subclass_when_append_is_called_with_args_then_args_are_assigned_in_order_of_annotated_cls_attributes_and_entry_is_created_in_entries():
     """Test given instance of list node subclass when append is called with args then args are assigned in order of annotated cls attributes and entry is created in entries."""
 
     # Given instance of ListNode subclass.
-    mock_list = Interface()
+    interface = Interface()
     name = Name("xe-0/0/1")
 
     # When append is called with args.
-    mock_list.append(name)
+    interface.append(name)
 
     # Then args are assigned in order of annotated cls attributes
     # and entry is created in entries.
-    assert mock_list.entries[0].name is name
+    assert interface.entries[0].name is name
 
 
 def test_given_instance_of_list_node_subclass_when_append_is_called_with_kwargs_then_kwargs_are_assigned_for_annotated_cls_attributes_and_entry_is_created_in_entries():
     """Test given instance of list node subclass when append is called with kwargs then kwargs are assigned for annotated cls attributes and entry is created in entries."""
 
     # Given instance of ListNode subclass.
-    mock_list = Interface()
+    interface = Interface()
     name = Name("xe-0/0/1")
 
     # When append is called with kwargs.
-    mock_list.append(name=name)
+    interface.append(name=name)
 
     # Then kwargs are assigned for annotated cls attributes and entry
     # is created in entries.
-    assert mock_list.entries[0].name is name
+    assert interface.entries[0].name is name
 
 
 def test_given_instance_of_list_node_subclass_when_append_is_called_without_args_or_kwargs_then_defaults_are_assigned_for_annotated_cls_attributes_and_entry_is_created_in_entries():
     """Test given instance of list node subclass when append is called without args or kwargs then defaults are assigned for annotated cls attributes and entry is created in entries."""
 
-    # Given instance of ListNode subclass.
-    mock_list = Interface()
+    # Given instance of ListNode subclass with default.
+    default = Name("xe-0/0/0")
+
+    class InterfaceDefault(Interface):
+        """Represents a subclass of ListNode."""
+
+        name: Name = default
+
+    interface = InterfaceDefault()
 
     # When append is called without args or kwargs.
-    mock_list.append()
+    interface.append()
 
     # Then defaults are assigned for annotated cls attributes and
     # entry is created in entries.
-    assert mock_list.entries[0].name is DEFAULT
+    assert interface.entries[0].name is default
 
 
 def test_given_instance_of_list_node_subclass_with_meta_info_defaults_when_append_is_called_without_args_or_kwargs_then_meta_info_default_are_assigned_for_annotated_cls_attributes_and_entry_is_created_in_entries():
     """Test given instance of list node subclass with meta info defaults when append is called without args or kwargs then meta info default are assigned for annotated cls attributes and entry is created in entries."""
 
     # Given instance of ListNode subclass with MetaInfo default.
-    class Override(Interface):
+    default = Name("xe-0/0/0")
+
+    class InterfaceDefault(Interface):
         """Represents a subclass of ListNode."""
 
-        name: Name = MetaInfo(default=DEFAULT)
+        name: Name = MetaInfo(default)
 
-    mock_list = Override()
+    interface = InterfaceDefault()
 
     # When append is called without args or kwargs.
-    mock_list.append()
+    interface.append()
 
     # Then MetaInfo.default are assigned for annotated cls attributes
     # and entry is created in entries.
-    assert mock_list.entries[0].name is DEFAULT
+    assert interface.entries[0].name is default
 
 
 def test_given_instance_of_list_node_subclass_when_append_is_called_with_too_many_args_or_kwargs_then_exception_is_raised():
     """Test given instance of list node subclass when append is called with too many args or kwargs then exception is raised."""
 
     # Given instance of ListNode subclass.
-    mock_list = Interface()
+    interface = Interface()
 
     # When append is called with too many args.
     with pytest.raises(TypeError) as exc:
-        mock_list.append("junos", "Too Many!")
+        interface.append(Name("xe-0/0/0"), Name("xe-0/0/1"))
 
     # Then exception has expected message.
     assert (
@@ -124,17 +130,13 @@ def test_given_instance_of_list_node_subclass_when_append_is_called_with_too_few
     """Test given instance of list node subclass when append is called with too few args or kwargs then exception is raised."""
 
     # Given instance of ListNode subclass.
-    class Override(Interface):
-        """Represents a subclass of ListNode."""
-
-        extra: Interface
 
     # When append is called with too few args.
     with pytest.raises(TypeError) as exc:
-        Override().append()
+        Interface().append()
 
     # Then exception has expected message.
-    assert str(exc.value) == "Missing required argument: extra"
+    assert str(exc.value) == "Missing required argument: name"
 
 
 def test_given_instance_of_list_node_subclass_with_entries_when_to_xml_is_called_then_xml_tree_from_each_entry_xml_element_returned():
@@ -178,12 +180,12 @@ def test_given_instance_of_list_node_subclass_with_child_nodes_given_child_nodes
 
     # Given instance of list node subclass with child node.
     # Given child node have MetaInfo default with attrs.
-    class Override(Interface):
+    class InterfaceDefaultMeta(Interface):
         """Represents a subclass of ListNode."""
 
         name: Name = MetaInfo(attrs={"nc:operation": "delete"})
 
-    interface = Override()
+    interface = InterfaceDefaultMeta()
     interface.append(Name("xe-0/0/0"))
 
     # When to_xml is called.
@@ -201,12 +203,12 @@ def test_given_instance_of_list_node_subclass_with_child_nodes_given_child_nodes
 
     # Given instance of list node subclass with child node.
     # Given child node have MetaInfo default without attrs.
-    class Override(Interface):
+    class InterfaceDefaultMeta(Interface):
         """Represents a subclass of ListNode."""
 
         name: Name = MetaInfo()
 
-    interface = Override()
+    interface = InterfaceDefaultMeta()
     interface.append(Name("xe-0/0/0"))
 
     # When to_xml is called.
