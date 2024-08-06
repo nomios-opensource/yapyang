@@ -79,14 +79,11 @@ class Node(metaclass=NodeMeta):
 
     __identifier__: t.Optional[str] = None
 
-    def __init__(self, *args, **kwargs) -> None:
-        """Initializer that takes any number of arguments for class meta
-        args."""
+    def __init__(self) -> None:
+        """Initializer that creates the mechanics for expected behavior."""
 
         self._cls_meta: t.Dict[str, t.Any] = self.__class__.__meta__  # type: ignore
         self._cls_identifier: str = self._cls_meta[DEFAULTS]["__identifier__"]
-        for cls_arg, value in self._cls_meta_args_resolver(args, kwargs):
-            setattr(self, cls_arg, value)
 
     def __new__(cls, *args, **kwargs):
         """Prevents instances of Node or direct subclasses."""
@@ -131,7 +128,19 @@ class Node(metaclass=NodeMeta):
             )
 
 
-class ModuleNode(Node):
+class InitNode(Node):
+    """Base class for YANG nodes that initialize with args."""
+
+    def __init__(self, *args, **kwargs) -> None:
+        """Initializer that takes any number of arguments for class meta
+        args."""
+
+        super().__init__()
+        for cls_arg, value in super()._cls_meta_args_resolver(args, kwargs):
+            setattr(self, cls_arg, value)
+
+
+class ModuleNode(InitNode, Node):
     """Base class for YANG module node."""
 
     __namespace__: t.Optional[str] = None
@@ -151,7 +160,7 @@ class ModuleNode(Node):
         return xml_tree
 
 
-class ContainerNode(Node):
+class ContainerNode(InitNode, Node):
     """Base class for YANG container node."""
 
     def to_xml(self, /, *, attrs: t.Optional[t.Dict[str, str]] = None) -> str:
@@ -195,10 +204,8 @@ class ListNode(Node):
     def __init__(self) -> None:
         """Initializer that creates the mechanics for expected behavior."""
 
+        super().__init__()
         self.entries: OrderedSet = OrderedSet()
-
-        self._cls_meta: t.Dict[str, t.Any] = self.__class__.__meta__  # type: ignore
-        self._cls_identifier: str = self._cls_meta[DEFAULTS]["__identifier__"]
         self._key: str = self._cls_meta[DEFAULTS]["__key__"]
 
     def append(self, *args, **kwargs) -> None:
@@ -238,10 +245,8 @@ class LeafListNode(Node):
     def __init__(self) -> None:
         """Initializer that creates the mechanics for expected behavior."""
 
+        super().__init__()
         self.entries: OrderedSet = OrderedSet()
-
-        self._cls_meta: dict[str, t.Any] = self.__class__.__meta__  # type: ignore
-        self._cls_identifier: str = self._cls_meta[DEFAULTS]["__identifier__"]
 
     def append(self, *value) -> None:
         """Takes a single ;) value argument to append a new entry into leaf
@@ -265,7 +270,7 @@ class LeafListNode(Node):
         return elements
 
 
-class LeafNode(Node):
+class LeafNode(InitNode, Node):
     """Base class for YANG leaf node."""
 
     value: t.Any
