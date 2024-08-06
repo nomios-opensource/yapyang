@@ -40,10 +40,10 @@ def test_given_instance_of_leaf_list_node_subclass_when_append_is_called_with_va
     assert value in user.entries
 
 
-def test_given_instance_of_leaf_list_node_subclass_when_append_is_called_without_value_then_default_entry_contained_in_entries():
-    """Test given instance of leaf list node subclass when append is called without value then default entry contained in entries"""
+def test_given_instance_of_leaf_list_node_subclass_with_value_default_when_append_is_called_without_value_then_default_entry_contained_in_entries():
+    """Test given instance of leaf list node subclass with value default when append is called without value then default entry contained in entries"""
 
-    # Given instance of LeafListNode subclass with default value.
+    # Given instance of LeafListNode subclass with value default.
     default = "John Doe"
 
     class UserDefault(User):
@@ -58,13 +58,13 @@ def test_given_instance_of_leaf_list_node_subclass_when_append_is_called_without
     assert default in user.entries
 
 
-def test_given_instance_of_leaf_list_node_subclass_when_append_is_called_with_too_many_values_then_exception_is_raised():
-    """Test given instance of leaf list node subclass when append is called with too many values then exception is raised."""
+def test_given_instance_of_leaf_list_node_subclass_when_append_is_called_with_more_than_one_value_then_exception_is_raised():
+    """Test given instance of leaf list node subclass when append is called with more than one value then exception is raised."""
 
     # Given instance of LeafListNode subclass.
     user = User()
 
-    # When append is called with too many values.
+    # When append is called with more than one value.
     with pytest.raises(TypeError) as exc:
         user.append("John Doe", "Jane Doe")
 
@@ -75,13 +75,13 @@ def test_given_instance_of_leaf_list_node_subclass_when_append_is_called_with_to
     )
 
 
-def test_given_instance_of_leaf_list_node_subclass_when_append_is_called_with_too_few_values_then_exception_is_raised():
-    """Test given instance of leaf list node subclass when append is called with too few values then exception is raised."""
+def test_given_instance_of_leaf_list_node_subclass_when_append_is_called_without_value_then_exception_is_raised():
+    """Test given instance of leaf list node subclass when append is called without value then exception is raised."""
 
     # Given instance of LeafListNode subclass.
     user = User()
 
-    # When append is called with too few values.
+    # When append is called with no value.
     with pytest.raises(TypeError) as exc:
         user.append()
 
