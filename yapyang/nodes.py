@@ -136,7 +136,7 @@ class InitNode(Node):
         args."""
 
         super().__init__()
-        for cls_arg, value in super()._cls_meta_args_resolver(args, kwargs):
+        for cls_arg, value in self._cls_meta_args_resolver(args, kwargs):
             setattr(self, cls_arg, value)
 
 
@@ -214,7 +214,7 @@ class ListNode(Node):
         """
 
         entry_attr: t.Dict[str, t.Any] = dict()
-        for cls_arg, value in super()._cls_meta_args_resolver(args, kwargs):
+        for cls_arg, value in self._cls_meta_args_resolver(args, kwargs):
             entry_attr[cls_arg] = value
         self.entries.add(ListEntry(entry_attr, key=self._key))
 
@@ -253,7 +253,7 @@ class LeafListNode(Node):
         list entries.
         """
 
-        for _, value in super()._cls_meta_args_resolver(value, dict()):
+        for _, value in self._cls_meta_args_resolver(value, dict()):
             self.entries.add(value)
 
     def to_xml(self, /, *, attrs: t.Optional[t.Dict[str, str]] = None) -> str:
