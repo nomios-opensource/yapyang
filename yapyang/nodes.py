@@ -18,7 +18,13 @@ import typing as t
 
 from ordered_set import OrderedSet
 
-from yapyang.constants import ANNOTATIONS, ARGS, DEFAULTS, XML_ELEMENT_TEMPLATE
+from yapyang.constants import (
+    ANNOTATIONS,
+    ARGS,
+    DEFAULTS,
+    UNSET,
+    XML_ELEMENT_TEMPLATE,
+)
 from yapyang.utils import (
     MetaInfo,
     concatenate_xml_element_attrs,
@@ -47,6 +53,7 @@ class NodeMeta(type):
 
         # Inherit from parents (bases) meta.
         for base_meta in [base.__meta__ for base in bases[::-1]]:
+            # Reverse so that leftmost base overwrites right.
             metadata.update(base_meta)
             args.update(base_meta[ARGS])
             defaults.update(base_meta[DEFAULTS])
@@ -59,7 +66,7 @@ class NodeMeta(type):
                 else:
                     args[attr] = annotation
 
-        for attr in list(namespace.keys()):
+        for attr in list(namespace):
             if attr in metadata or attr in args:
                 defaults[attr] = namespace.pop(attr)
 
@@ -67,17 +74,40 @@ class NodeMeta(type):
         metadata[DEFAULTS] = defaults
         namespace["__meta__"] = metadata
 
+    @staticmethod
+    def _meta_default_checker(metadata: t.Dict[str, t.Any], /):
+        """Ensures that namespace metadata defaults are valid."""
+
+        for attr, default in metadata[DEFAULTS].items():
+            if attr in metadata:
+                if isinstance(default, MetaInfo):
+                    raise ValueError(
+                        f"MetaInfo cannot be used on metadata attributes: {attr}"
+                    )
+                annotation = metadata[attr]
+            elif attr in metadata[ARGS]:
+                if isinstance(default, MetaInfo):
+                    if (default := default.default) is UNSET:
+                        continue
+                annotation = metadata[ARGS][attr]
+
+            if type(default) is not annotation:
+                raise ValueError(
+                    f"Expected default of {annotation} for {attr}, got {type(default)}."
+                )
+
     def __new__(cls, cls_name: str, bases: tuple, namespace: dict):
         """Constructs class namespace metadata, and creates class object."""
 
         cls._construct_meta(namespace, bases)
+        cls._meta_default_checker(namespace["__meta__"])
         return super().__new__(cls, cls_name, bases, namespace)
 
 
 class Node(metaclass=NodeMeta):
     """Base class for all YANG nodes."""
 
-    __identifier__: t.Optional[str] = None
+    __identifier__: str
 
     def __init__(self) -> None:
         """Initializer that creates the mechanics for expected behavior."""
@@ -114,6 +144,8 @@ class Node(metaclass=NodeMeta):
                     is MetaInfo
                 ):
                     value = value.default
+                    # BUG: When MetaInfo instance has an unset default,
+                    # an exception should be raised.
             else:
                 raise TypeError(f"Missing required argument: {cls_arg}")
             yield (cls_arg, value)
@@ -143,7 +175,7 @@ class InitNode(Node):
 class ModuleNode(InitNode, Node):
     """Base class for YANG module node."""
 
-    __namespace__: t.Optional[str] = None
+    __namespace__: str
 
     def to_xml(self) -> str:
         """Returns an XML tree from instance."""

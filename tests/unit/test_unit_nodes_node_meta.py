@@ -2,7 +2,10 @@
 
 from unittest.mock import Mock
 
+import pytest
+
 from yapyang.nodes import NodeMeta
+from yapyang.utils import MetaInfo
 
 ANNOTATIONS: str = "__annotations__"
 META: str = "__meta__"
@@ -218,14 +221,104 @@ def test_given_namespace_with_attribute_annotations_that_has_defaults_that_confl
     assert namespace[META][DEFAULTS][cls_attribute] is cls_attribute_default
 
 
-def test_given_args_when_node_meta_new_method_called_then_construct_meta_is_called_once():
-    """Test given args when node meta new method called then construct meta is called once."""
+def test_given_namespace_meta_with_attribute_defaults_not_of_annotation_when_meta_default_checker_is_called_then_exception_is_raised():
+    """Test given namespace meta with attribute defaults not of annotation when meta default checker is called then exception is raised."""
 
-    # Given mock construct meta.
-    NodeMeta._construct_meta = Mock()
+    # Given namespace meta with attribute default not of annotation.
+    namespace_meta = {
+        (cls_attribute := "__identifier__"): (cls_attribute_annotation := str),
+        ARGS: {},
+        DEFAULTS: {cls_attribute: (cls_attribute_default := 1)},
+    }
 
-    # When new is called.
-    NodeMeta.__new__(NodeMeta, "MockClass", (), {})
+    # When meta default checker is called.
+    with pytest.raises(ValueError) as exc:
+        NodeMeta._meta_default_checker(namespace_meta)
 
-    # Then construct meta is called once.
-    NodeMeta._construct_meta.assert_called_once()
+    # Then exception has expected message.
+    assert (
+        str(exc.value)
+        == f"Expected default of {cls_attribute_annotation} for {cls_attribute}, got {type(cls_attribute_default)}."
+    )
+
+
+def test_given_namespace_meta_with_attribute_defaults_of_meta_info_when_meta_default_checker_is_called_then_exception_is_raised():
+    """Test given namespace meta with attribute defaults of meta info when meta default checker is called then exception is raised."""
+
+    # Given namespace meta with attribute default of MetaInfo.
+    namespace_meta = {
+        (cls_attribute := "__identifier__"): str,
+        ARGS: {},
+        DEFAULTS: {cls_attribute: MetaInfo()},
+    }
+
+    # When meta default checker is called.
+    with pytest.raises(ValueError) as exc:
+        NodeMeta._meta_default_checker(namespace_meta)
+
+    # Then exception has expected message.
+    assert (
+        str(exc.value)
+        == f"MetaInfo cannot be used on metadata attributes: {cls_attribute}"
+    )
+
+
+def test_given_namespace_meta_args_with_attribute_defaults_not_of_annotation_when_meta_default_checker_is_called_then_exception_is_raised():
+    """Test given namespace meta args with attribute defaults not of annotation when meta default checker is called then exception is raised."""
+
+    # Given namespace meta args with attribute default not of annotation.
+    namespace_meta = {
+        ARGS: {
+            (cls_attribute := "identifier"): (cls_attribute_annotation := int),
+        },
+        DEFAULTS: {cls_attribute: (cls_attribute_default := "one")},
+    }
+
+    # When meta default checker is called.
+    with pytest.raises(ValueError) as exc:
+        NodeMeta._meta_default_checker(namespace_meta)
+
+    # Then exception has expected message.
+    assert (
+        str(exc.value)
+        == f"Expected default of {cls_attribute_annotation} for {cls_attribute}, got {type(cls_attribute_default)}."
+    )
+
+
+def test_given_namespace_meta_args_with_attribute_defaults_of_meta_info_when_meta_default_checker_is_called_then_exception_is_not_raised():
+    """Test given namespace meta args with attribute defaults of meta info when meta default checker is called then exception is not raised."""
+
+    # Given namespace meta args with attribute default of MetaInfo.
+    namespace_meta = {
+        ARGS: {
+            (cls_attribute := "identifier"): float,
+        },
+        DEFAULTS: {cls_attribute: MetaInfo()},
+    }
+    # When meta default checker is called.
+    NodeMeta._meta_default_checker(namespace_meta)
+
+    # Then exception is not raised.
+
+
+def test_given_namespace_meta_args_with_attribute_defaults_of_meta_info_and_default_not_of_annotation_when_meta_default_checker_is_called_then_exception_is_raised():
+    """Test given namespace meta args with attribute defaults of meta info and default not of annotation when meta default checker is called then exception is raised."""
+
+    # Given namespace meta args with attribute default of MetaInfo,
+    # and MetaInfo.default not of annotation.
+    namespace_meta = {
+        ARGS: {
+            (cls_attribute := "identifier"): (cls_attribute_annotation := str),
+        },
+        DEFAULTS: {cls_attribute: MetaInfo((cls_attribute_default := 1))},
+    }
+
+    # When meta default checker is called.
+    with pytest.raises(ValueError) as exc:
+        NodeMeta._meta_default_checker(namespace_meta)
+
+    # Then exception has expected message.
+    assert (
+        str(exc.value)
+        == f"Expected default of {cls_attribute_annotation} for {cls_attribute}, got {type(cls_attribute_default)}."
+    )

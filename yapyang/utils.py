@@ -16,7 +16,7 @@ limitations under the License.
 
 import typing as t
 
-from yapyang.constants import DEFAULTS, XML_ATTRIBUTE_TEMPLATE
+from yapyang.constants import DEFAULTS, XML_ATTRIBUTE_TEMPLATE, UNSET
 
 __all__ = ("MetaInfo",)
 
@@ -26,7 +26,7 @@ class MetaInfo:
 
     def __init__(
         self,
-        default: t.Optional[t.Any] = None,
+        default: t.Any = UNSET,
         attrs: t.Optional[t.Dict[str, str]] = None,
     ) -> None:
         self.default = default
