@@ -190,7 +190,7 @@ def test_given_instance_of_subclass_of_node_subclass_when_cls_meta_args_resolver
 
     instance = MockNode()
 
-    # When cls_meta_args_resolver is given too few args.
+    # When cls_meta_args_resolver is given too few args or kwargs.
     with pytest.raises(TypeError) as exc:
         tuple(instance._cls_meta_args_resolver(tuple(), dict()))
 
