@@ -34,7 +34,7 @@ def test_given_instance_of_leaf_list_node_subclass_with_entries_when_to_xml_is_c
     user.append((john := "John Doe"))
     user.append((jane := "Jane Doe"))
 
-    # When to_xml is called.
+    # When to_xml is called with attrs.
     xml = user.to_xml(attrs={"operation": "create"})
 
     # Then for each entry XML element with attrs returned.

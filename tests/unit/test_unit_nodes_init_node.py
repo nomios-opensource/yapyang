@@ -7,8 +7,10 @@ import pytest
 from yapyang.nodes import InitNode, Node
 
 
-class MockInitNode(InitNode):
+class InitNodeSubclass(InitNode):
     """Represents a subclass of InitNode."""
+
+    __identifier__ = "init_node_subclass"
 
 
 @patch.object(Node, "__init__")
@@ -23,7 +25,7 @@ def test_given_init_node_subclass_when_instantiated_then_node_initializer_called
     with pytest.raises(AttributeError):
         # Then exception is raised for attributes that Node __init__
         # Mock did not create.
-        MockInitNode()
+        InitNodeSubclass()
 
     # Then Node __init__ Mock was called.
     node_init.assert_called()
@@ -47,13 +49,15 @@ def test_given_init_node_subclass_when_instantiated_with_args_and_kwargs_then_cl
     # Given Mock _cls_meta_args_resolver that returns Mock iterator
     # when called.
     mock = MagicMock(return_value=mock_iterator)
-    MockInitNode._cls_meta_args_resolver = mock
+    InitNodeSubclass._cls_meta_args_resolver = mock
 
     # When instantiated with args and kwargs.
-    instance = MockInitNode(*args, **kwargs)
+    instance = InitNodeSubclass(*args, **kwargs)
 
     # Then Mock _cls_meta_args_resolver was called with args and kwargs.
-    MockInitNode._cls_meta_args_resolver.assert_called_once_with(args, kwargs)
+    InitNodeSubclass._cls_meta_args_resolver.assert_called_once_with(
+        args, kwargs
+    )
 
     # Then Mock iterator __iter__ was called.
     mock_iterator.__iter__.assert_called()

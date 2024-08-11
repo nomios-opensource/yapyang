@@ -7,8 +7,10 @@ from ordered_set import OrderedSet
 from yapyang.nodes import LeafListNode, Node
 
 
-class MockLeafListNode(LeafListNode):
+class LeafListNodeSubclass(LeafListNode):
     """Represents a subclass of LeafListNode."""
+
+    __identifier__ = "leaf_list_node_subclass"
 
 
 def test_given_leaf_list_node_subclass_when_instantiated_then_entries_attribute_created():
@@ -17,7 +19,7 @@ def test_given_leaf_list_node_subclass_when_instantiated_then_entries_attribute_
     # Given LeafListNode subclass.
 
     # When instantiated.
-    user = MockLeafListNode()
+    user = LeafListNodeSubclass()
 
     # Then entries attribute created.
     assert "entries" in user.__dict__
@@ -33,7 +35,7 @@ def test_given_leaf_list_node_subclass_when_instantiated_then_node_initializer_c
     # Given LeafListNode subclass.
 
     # When instantiated.
-    MockLeafListNode()
+    LeafListNodeSubclass()
 
     # Then Node __init__ Mock was called.
     node_init.assert_called()
@@ -56,16 +58,16 @@ def test_given_instance_of_leaf_list_node_subclass_when_append_is_called_with_va
     # Given Mock _cls_meta_args_resolver that returns Mock iterator
     # when called.
     mock = MagicMock(return_value=mock_iterator)
-    MockLeafListNode._cls_meta_args_resolver = mock
+    LeafListNodeSubclass._cls_meta_args_resolver = mock
 
     # Given instance of LeafListNode subclass.
-    instance = MockLeafListNode()
+    instance = LeafListNodeSubclass()
 
     # When append is called with value.
     instance.append(*value)
 
     # Then Mock _cls_meta_args_resolver was called with value.
-    MockLeafListNode._cls_meta_args_resolver.assert_called_once_with(
+    LeafListNodeSubclass._cls_meta_args_resolver.assert_called_once_with(
         value, dict()
     )
 
