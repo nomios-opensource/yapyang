@@ -75,13 +75,13 @@ class NodeMeta(type):
         namespace["__meta__"] = metadata
 
     @staticmethod
-    def _meta_default_checker(metadata: t.Dict[str, t.Any], /):
+    def _meta_default_checker(metadata: t.Dict[str, t.Any], /) -> None:
         """Ensures that namespace metadata defaults are valid."""
 
         for attr, default in metadata[DEFAULTS].items():
             if attr in metadata:
                 if isinstance(default, MetaInfo):
-                    raise ValueError(
+                    raise TypeError(
                         f"MetaInfo cannot be used on metadata attributes: {attr}"
                     )
                 annotation = metadata[attr]
@@ -91,9 +91,9 @@ class NodeMeta(type):
                         continue
                 annotation = metadata[ARGS][attr]
 
-            if type(default) is not annotation:
-                raise ValueError(
-                    f"Expected default of {annotation} for {attr}, got {type(default)}."
+            if (default_type := type(default)) is not annotation:
+                raise TypeError(
+                    f"Expected default of type {annotation} for {attr}, got type {default_type}."
                 )
 
     def __new__(cls, cls_name: str, bases: tuple, namespace: dict):
@@ -124,16 +124,17 @@ class Node(metaclass=NodeMeta):
             )
         return super().__new__(cls)
 
-    def _cls_meta_args_resolver(
-        self, args: tuple, kwargs: dict
-    ) -> t.Generator[t.Tuple[str, t.Any], None, None]:
+    def _cls_meta_args_resolver(self, args: tuple, kwargs: dict):
         """Yields the name and resolved value for each class meta
         argument."""
 
         self._check_given_args_not_greater_than_expected(
             (len(args) + len(kwargs))
         )
-        for index, cls_arg in enumerate(self._cls_meta[ARGS]):
+        for index, (cls_arg, annotation) in enumerate(
+            self._cls_meta[ARGS].items()
+        ):
+            value = UNSET
             if len(args) > index:
                 value = args[index]
             elif cls_arg in kwargs:
@@ -144,10 +145,13 @@ class Node(metaclass=NodeMeta):
                     is MetaInfo
                 ):
                     value = value.default
-                    # BUG: When MetaInfo instance has an unset default,
-                    # an exception should be raised.
-            else:
+            if value is UNSET:
                 raise TypeError(f"Missing required argument: {cls_arg}")
+            if (value_type := type(value)) is not annotation:
+                # NOTE: Defaults are type checked twice.
+                raise TypeError(
+                    f"Expected argument of type {annotation} for {cls_arg}, got type {value_type}."
+                )
             yield (cls_arg, value)
 
     def _check_given_args_not_greater_than_expected(self, given: int) -> None:

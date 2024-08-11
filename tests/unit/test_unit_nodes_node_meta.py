@@ -232,13 +232,13 @@ def test_given_namespace_meta_with_attribute_defaults_not_of_annotation_when_met
     }
 
     # When meta default checker is called.
-    with pytest.raises(ValueError) as exc:
+    with pytest.raises(TypeError) as exc:
         NodeMeta._meta_default_checker(namespace_meta)
 
     # Then exception has expected message.
     assert (
         str(exc.value)
-        == f"Expected default of {cls_attribute_annotation} for {cls_attribute}, got {type(cls_attribute_default)}."
+        == f"Expected default of type {cls_attribute_annotation} for {cls_attribute}, got type {type(cls_attribute_default)}."
     )
 
 
@@ -269,7 +269,7 @@ def test_given_namespace_meta_with_attribute_defaults_of_meta_info_when_meta_def
     }
 
     # When meta default checker is called.
-    with pytest.raises(ValueError) as exc:
+    with pytest.raises(TypeError) as exc:
         NodeMeta._meta_default_checker(namespace_meta)
 
     # Then exception has expected message.
@@ -291,13 +291,13 @@ def test_given_namespace_meta_args_with_attribute_defaults_not_of_annotation_whe
     }
 
     # When meta default checker is called.
-    with pytest.raises(ValueError) as exc:
+    with pytest.raises(TypeError) as exc:
         NodeMeta._meta_default_checker(namespace_meta)
 
     # Then exception has expected message.
     assert (
         str(exc.value)
-        == f"Expected default of {cls_attribute_annotation} for {cls_attribute}, got {type(cls_attribute_default)}."
+        == f"Expected default of type {cls_attribute_annotation} for {cls_attribute}, got type {type(cls_attribute_default)}."
     )
 
 
@@ -347,11 +347,11 @@ def test_given_namespace_meta_args_with_attribute_defaults_of_meta_info_and_defa
     }
 
     # When meta default checker is called.
-    with pytest.raises(ValueError) as exc:
+    with pytest.raises(TypeError) as exc:
         NodeMeta._meta_default_checker(namespace_meta)
 
     # Then exception has expected message.
     assert (
         str(exc.value)
-        == f"Expected default of {cls_attribute_annotation} for {cls_attribute}, got {type(cls_attribute_default)}."
+        == f"Expected default of type {cls_attribute_annotation} for {cls_attribute}, got type {type(cls_attribute_default)}."
     )
