@@ -242,6 +242,22 @@ def test_given_namespace_meta_with_attribute_defaults_not_of_annotation_when_met
     )
 
 
+def test_given_namespace_meta_with_attribute_defaults_of_annotation_when_meta_default_checker_is_called_then_exception_is_not_raised():
+    """Test given namespace meta with attribute defaults of annotation when meta default checker is called then exception is not raised."""
+
+    # Given namespace meta with attribute default of annotation.
+    namespace_meta = {
+        (cls_attribute := "__identifier__"): str,
+        ARGS: {},
+        DEFAULTS: {cls_attribute: "junos"},
+    }
+
+    # When meta default checker is called.
+    NodeMeta._meta_default_checker(namespace_meta)
+
+    # Then exception is not raised.
+
+
 def test_given_namespace_meta_with_attribute_defaults_of_meta_info_when_meta_default_checker_is_called_then_exception_is_raised():
     """Test given namespace meta with attribute defaults of meta info when meta default checker is called then exception is raised."""
 
@@ -283,6 +299,23 @@ def test_given_namespace_meta_args_with_attribute_defaults_not_of_annotation_whe
         str(exc.value)
         == f"Expected default of {cls_attribute_annotation} for {cls_attribute}, got {type(cls_attribute_default)}."
     )
+
+
+def test_given_namespace_meta_args_with_attribute_defaults_of_annotation_when_meta_default_checker_is_called_then_exception_is_not_raised():
+    """Test given namespace meta args with attribute defaults of annotation when meta default checker is called then exception is not raised."""
+
+    # Given namespace meta args with attribute default of annotation.
+    namespace_meta = {
+        ARGS: {
+            (cls_attribute := "identifier"): int,
+        },
+        DEFAULTS: {cls_attribute: 1},
+    }
+
+    # When meta default checker is called.
+    NodeMeta._meta_default_checker(namespace_meta)
+
+    # Then exception is not raised.
 
 
 def test_given_namespace_meta_args_with_attribute_defaults_of_meta_info_when_meta_default_checker_is_called_then_exception_is_not_raised():
