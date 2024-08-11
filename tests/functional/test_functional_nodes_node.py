@@ -12,6 +12,8 @@ class ContainerNode(Node):
 class Interfaces(ContainerNode):
     """Represents a subclass of ContainerNode."""
 
+    __identifier__ = "interfaces"
+
 
 def test_when_node_instantiated_then_exception_is_raised():
     """Test when node instantiated then exception is raised."""

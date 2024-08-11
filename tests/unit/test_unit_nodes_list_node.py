@@ -13,13 +13,16 @@ from yapyang.nodes import LeafNode, ListEntry, ListNode, Node
 class FirstOrLastName(LeafNode):
     """Represents a ListNode child node."""
 
+    __identifier__ = "first_or_last_name"
+
     value: str
 
 
-class MockListNode(ListNode):
+class ListNodeSubclass(ListNode):
     """Represents a subclass of ListNode."""
 
-    __key__: str = "firstname"
+    __identifier__ = "list_node_subclass"
+    __key__ = "firstname"
 
     firstname: FirstOrLastName
     lastname: FirstOrLastName
@@ -31,7 +34,7 @@ def test_given_list_node_subclass_when_instantiated_then_entries_attribute_creat
     # Given ListNode subclass.
 
     # When instantiated.
-    interface = MockListNode()
+    interface = ListNodeSubclass()
 
     # Then entries attribute created.
     assert "entries" in interface.__dict__
@@ -50,7 +53,7 @@ def test_given_list_node_subclass_when_instantiated_then_node_initializer_called
     with pytest.raises(AttributeError):
         # Then exception is raised for attributes that Node __init__
         # Mock did not create.
-        MockListNode()
+        ListNodeSubclass()
 
     # Then Node __init__ Mock was called.
     node_init.assert_called()
@@ -66,7 +69,7 @@ def test_given_instance_of_list_node_subclass_when_append_is_called_with_args_an
     # Given tuple of cls_arg, value pairs.
     cls_arg_value_pairs = tuple(
         (cls_arg, FirstOrLastName(random.choice(string.ascii_letters)))
-        for cls_arg in MockListNode.__meta__["__args__"]
+        for cls_arg in ListNodeSubclass.__meta__["__args__"]
     )
 
     # Given Mock iterator with __iter__ method that returns a tuple
@@ -77,16 +80,18 @@ def test_given_instance_of_list_node_subclass_when_append_is_called_with_args_an
     # Given Mock _cls_meta_args_resolver that returns Mock iterator
     # when called.
     mock = MagicMock(return_value=mock_iterator)
-    MockListNode._cls_meta_args_resolver = mock
+    ListNodeSubclass._cls_meta_args_resolver = mock
 
     # Given instance of ListNode subclass.
-    instance = MockListNode()
+    instance = ListNodeSubclass()
 
     # When append is called with args and kwargs.
     instance.append(*args, **kwargs)
 
     # Then Mock _cls_meta_args_resolver was called with args and kwargs.
-    MockListNode._cls_meta_args_resolver.assert_called_once_with(args, kwargs)
+    ListNodeSubclass._cls_meta_args_resolver.assert_called_once_with(
+        args, kwargs
+    )
 
     # Then Mock iterator __iter__ was called.
     mock_iterator.__iter__.assert_called()
