@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.2.0](https://github.com/nomios-opensource/yapyang/compare/v0.1.0...v0.2.0) (2024-08-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* add type annotation check ([#5](https://github.com/nomios-opensource/yapyang/issues/5))
+
+### Features
+
+* add auto node identifier derived from class name ([ef58234](https://github.com/nomios-opensource/yapyang/commit/ef58234b355dcf5499b5a3fead62a473a7d70f01))
+* add type annotation check ([#5](https://github.com/nomios-opensource/yapyang/issues/5)) ([c72a2b9](https://github.com/nomios-opensource/yapyang/commit/c72a2b9766e2aa4508fe1de0e6da265adb4bb639))
+* implement YANG leaf list node mvp ([2c817ca](https://github.com/nomios-opensource/yapyang/commit/2c817ca0b52efc79021b2c7de15df3cda909b7d4))
+
+
+### Bug Fixes
+
+* change method of calling _cls_meta_args_resolver ([85e8d84](https://github.com/nomios-opensource/yapyang/commit/85e8d84b38067a102b127dc97693a2b5d1e1bec0))
+
+
+### Documentation
+
+* add mkdocs ([e886dd1](https://github.com/nomios-opensource/yapyang/commit/e886dd177a33eeed38501cf4b71996406c7936e7))
+* add quick start to README.md ([37b0959](https://github.com/nomios-opensource/yapyang/commit/37b095938938c2f934e2566e990f7213b801a185))
+* add shields to README.md ([5ba7700](https://github.com/nomios-opensource/yapyang/commit/5ba7700d8943adf97e9fdba76c18e884bc0275c3))
+* format quick start code blocks ([f3bae97](https://github.com/nomios-opensource/yapyang/commit/f3bae97674ce3d02c0ea21a5c95f4f661cd7e12e))
+
 ## 0.1.0 (2024-07-26)
 
 
