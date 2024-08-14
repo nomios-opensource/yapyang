@@ -22,6 +22,7 @@ from yapyang.constants import (
     ANNOTATIONS,
     ARGS,
     DEFAULTS,
+    IDENTIFIER,
     UNSET,
     XML_ELEMENT_TEMPLATE,
 )
@@ -75,6 +76,28 @@ class NodeMeta(type):
         namespace["__meta__"] = metadata
 
     @staticmethod
+    def _meta_checker(cls_name: str, bases: tuple, metadata: dict, /) -> None:
+        """Ensures that YANG node is valid."""
+
+        if cls_name in (
+            "Node",
+            "InitNode",
+            "ModuleNode",
+            "ContainerNode",
+            "ListNode",
+            "LeafListNode",
+            "LeafNode",
+        ):
+            return
+
+        if metadata[IDENTIFIER] is not str:
+            raise TypeError(f"Changing {IDENTIFIER} annotation is forbidden.")
+        if IDENTIFIER not in metadata[DEFAULTS]:
+            metadata[DEFAULTS][IDENTIFIER] = cls_name.lower()
+
+        NodeMeta._meta_default_checker(metadata)
+
+    @staticmethod
     def _meta_default_checker(metadata: t.Dict[str, t.Any], /) -> None:
         """Ensures that namespace metadata defaults are valid."""
 
@@ -100,7 +123,7 @@ class NodeMeta(type):
         """Constructs class namespace metadata, and creates class object."""
 
         cls._construct_meta(namespace, bases)
-        cls._meta_default_checker(namespace["__meta__"])
+        cls._meta_checker(cls_name, bases, namespace["__meta__"])
         return super().__new__(cls, cls_name, bases, namespace)
 
 
@@ -113,7 +136,7 @@ class Node(metaclass=NodeMeta):
         """Initializer that creates the mechanics for expected behavior."""
 
         self._cls_meta: t.Dict[str, t.Any] = self.__class__.__meta__  # type: ignore
-        self._cls_identifier: str = self._cls_meta[DEFAULTS]["__identifier__"]
+        self._cls_identifier: str = self._cls_meta[DEFAULTS][IDENTIFIER]
 
     def __new__(cls, *args, **kwargs):
         """Prevents instances of Node or direct subclasses."""
@@ -124,7 +147,9 @@ class Node(metaclass=NodeMeta):
             )
         return super().__new__(cls)
 
-    def _cls_meta_args_resolver(self, args: tuple, kwargs: dict):
+    def _cls_meta_args_resolver(
+        self, args: tuple, kwargs: dict
+    ) -> t.Generator[t.Tuple[str, t.Any], None, None]:
         """Yields the name and resolved value for each class meta
         argument."""
 

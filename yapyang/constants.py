@@ -26,3 +26,5 @@ UNSET: object = object()
 
 XML_ELEMENT_TEMPLATE: str = "<{0}{1}>{2}</{0}>"
 XML_ATTRIBUTE_TEMPLATE: str = ' {0}="{1}"'
+
+IDENTIFIER: str = "__identifier__"
