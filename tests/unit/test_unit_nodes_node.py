@@ -38,8 +38,8 @@ def test_given_node_has_annotated_dunder_identifier_cls_attribute_when_node_obje
     assert Node.__meta__[__identifier__] is str
 
 
-def test_given_instance_of_subclass_of_node_subclass_when_cls_meta_args_resolver_is_called_with_args_then_yields_sequentially_cls_arg_and_arg_value_pair():
-    """Test given instance of subclass of node subclass when cls meta args resolver is called with args then yields sequentially cls arg and arg value pair."""
+def test_given_instance_of_subclass_of_node_subclass_when_resolve_cls_meta_args_is_called_with_args_then_yields_sequentially_cls_arg_and_arg_value_pair():
+    """Test given instance of subclass of node subclass when resolve cls meta args is called with args then yields sequentially cls arg and arg value pair."""
 
     # Given args.
     args = tuple(
@@ -49,8 +49,8 @@ def test_given_instance_of_subclass_of_node_subclass_when_cls_meta_args_resolver
     # Given instance of subclass of Node subclass.
     instance = Person()
 
-    # When cls_meta_args_resolver is called with args.
-    generator = instance._cls_meta_args_resolver(args, dict())
+    # When resolve_cls_meta_args is called with args.
+    generator = instance._resolve_cls_meta_args(args, dict())
 
     # Then generator is returned.
     assert isinstance(generator, types.GeneratorType)
@@ -63,8 +63,8 @@ def test_given_instance_of_subclass_of_node_subclass_when_cls_meta_args_resolver
         assert args[index] is value
 
 
-def test_given_instance_of_subclass_of_node_subclass_when_cls_meta_args_resolver_is_called_with_kwargs_then_yields_matched_cls_arg_and_kwarg_value_pair():
-    """Test given instance of subclass of node subclass when cls meta args resolver is called with kwargs then yields matched cls arg and kwarg value pair."""
+def test_given_instance_of_subclass_of_node_subclass_when_resolve_cls_meta_args_is_called_with_kwargs_then_yields_matched_cls_arg_and_kwarg_value_pair():
+    """Test given instance of subclass of node subclass when resolve cls meta args is called with kwargs then yields matched cls arg and kwarg value pair."""
 
     # Given kwargs.
     kwargs = {
@@ -75,8 +75,8 @@ def test_given_instance_of_subclass_of_node_subclass_when_cls_meta_args_resolver
     # Given instance of subclass of Node subclass.
     instance = Person()
 
-    # When cls_meta_args_resolver is called with kwargs.
-    generator = instance._cls_meta_args_resolver(tuple(), kwargs)
+    # When resolve_cls_meta_args is called with kwargs.
+    generator = instance._resolve_cls_meta_args(tuple(), kwargs)
 
     # Then generator is returned.
     assert isinstance(generator, types.GeneratorType)
@@ -86,14 +86,14 @@ def test_given_instance_of_subclass_of_node_subclass_when_cls_meta_args_resolver
         assert kwargs[cls_arg] is value
 
 
-def test_given_instance_of_subclass_of_node_subclass_with_defaults_when_cls_meta_args_resolver_is_called_with_empty_args_and_kwargs_then_yields_matched_cls_arg_and_default_value_pair():
-    """Test given instance of subclass of node subclass with defaults when cls meta args resolver is called with empty args and kwargs then yields matched cls arg and default value pair."""
+def test_given_instance_of_subclass_of_node_subclass_with_defaults_when_resolve_cls_meta_args_is_called_with_empty_args_and_kwargs_then_yields_matched_cls_arg_and_default_value_pair():
+    """Test given instance of subclass of node subclass with defaults when resolve cls meta args is called with empty args and kwargs then yields matched cls arg and default value pair."""
 
     # Given instance of subclass of Node subclass.
     instance = Person()
 
-    # When cls_meta_args_resolver is called with empty args and kwargs.
-    generator = instance._cls_meta_args_resolver(tuple(), dict())
+    # When resolve_cls_meta_args is called with empty args and kwargs.
+    generator = instance._resolve_cls_meta_args(tuple(), dict())
 
     # Then generator is returned.
     assert isinstance(generator, types.GeneratorType)
@@ -103,8 +103,8 @@ def test_given_instance_of_subclass_of_node_subclass_with_defaults_when_cls_meta
         assert Person.__meta__["__defaults__"][cls_arg] is value
 
 
-def test_given_instance_of_subclass_of_node_subclass_with_meta_info_defaults_when_cls_meta_args_resolver_is_called_with_empty_args_and_kwargs_then_yields_matched_cls_args_and_default_meta_info_default_value_pair():
-    """Test given instance of subclass of node subclass with meta info defaults when cls meta args resolver is called with empty args and kwargs then yields matched cls arg and default meta info default value pair."""
+def test_given_instance_of_subclass_of_node_subclass_with_meta_info_defaults_when_resolve_cls_meta_args_is_called_with_empty_args_and_kwargs_then_yields_matched_cls_args_and_default_meta_info_default_value_pair():
+    """Test given instance of subclass of node subclass with meta info defaults when resolve cls meta args is called with empty args and kwargs then yields matched cls arg and default meta info default value pair."""
 
     # Given instance of subclass of Node subclass with MetaInfo defaults.
     class PersonMetaInfo(Person):
@@ -113,8 +113,8 @@ def test_given_instance_of_subclass_of_node_subclass_with_meta_info_defaults_whe
 
     instance = PersonMetaInfo()
 
-    # When cls_meta_args_resolver is called with empty args and kwargs.
-    generator = instance._cls_meta_args_resolver(tuple(), dict())
+    # When resolve_cls_meta_args is called with empty args and kwargs.
+    generator = instance._resolve_cls_meta_args(tuple(), dict())
 
     # Then generator is returned.
     assert isinstance(generator, types.GeneratorType)
@@ -126,8 +126,8 @@ def test_given_instance_of_subclass_of_node_subclass_with_meta_info_defaults_whe
         )
 
 
-def test_given_instance_of_subclass_of_node_subclass_when_cls_meta_args_resolver_is_called_with_too_many_args_or_kwargs_then_on_first_iteration_exception_is_raised():
-    """Test given instance of subclass of node subclass when cls meta args resolver is called with too many args or kwargs then on first iteration exception is raised."""
+def test_given_instance_of_subclass_of_node_subclass_when_resolve_cls_meta_args_is_called_with_too_many_args_or_kwargs_then_on_first_iteration_exception_is_raised():
+    """Test given instance of subclass of node subclass when resolve cls meta args is called with too many args or kwargs then on first iteration exception is raised."""
 
     # Given instance of subclass of Node subclass.
     instance = Person()
@@ -135,8 +135,8 @@ def test_given_instance_of_subclass_of_node_subclass_when_cls_meta_args_resolver
     # Given format of exception message.
     exception_message = "{0} takes {1} arguments, but {2} were given."
 
-    # When cls_meta_args_resolver is called with too many args.
-    generator = instance._cls_meta_args_resolver(args := (1, 2, 3), dict())
+    # When resolve_cls_meta_args is called with too many args.
+    generator = instance._resolve_cls_meta_args(args := (1, 2, 3), dict())
 
     # Then on first iteration exception is raised.
     with pytest.raises(TypeError) as exc:
@@ -147,8 +147,8 @@ def test_given_instance_of_subclass_of_node_subclass_when_cls_meta_args_resolver
         Person.__name__, len(MOCK_NODE_CLS_ARGS), len(args)
     )
 
-    # When cls_meta_args_resolver is called with too many kwargs.
-    generator = instance._cls_meta_args_resolver(
+    # When resolve_cls_meta_args is called with too many kwargs.
+    generator = instance._resolve_cls_meta_args(
         tuple(), kwargs := dict(one=1, two=2, three=3)
     )
 
@@ -161,8 +161,8 @@ def test_given_instance_of_subclass_of_node_subclass_when_cls_meta_args_resolver
         Person.__name__, len(MOCK_NODE_CLS_ARGS), len(kwargs)
     )
 
-    # When cls_meta_args_resolver is called with too many args and kwargs.
-    generator = instance._cls_meta_args_resolver(
+    # When resolve_cls_meta_args is called with too many args and kwargs.
+    generator = instance._resolve_cls_meta_args(
         args := (1, 2), kwargs := dict(three=3)
     )
 
@@ -176,8 +176,8 @@ def test_given_instance_of_subclass_of_node_subclass_when_cls_meta_args_resolver
     )
 
 
-def test_given_instance_of_subclass_of_node_subclass_when_cls_meta_args_resolver_is_called_with_too_few_args_or_kwargs_then_exception_is_raised():
-    """Test given instance of subclass of node subclass when cls meta args resolver is called with too few args or kwargs then exception is raised."""
+def test_given_instance_of_subclass_of_node_subclass_when_resolve_cls_meta_args_is_called_with_too_few_args_or_kwargs_then_exception_is_raised():
+    """Test given instance of subclass of node subclass when resolve cls meta args is called with too few args or kwargs then exception is raised."""
 
     # Given instance of subclass of Node subclass.
     class Person(NodeSubclass):
@@ -190,45 +190,9 @@ def test_given_instance_of_subclass_of_node_subclass_when_cls_meta_args_resolver
 
     instance = Person()
 
-    # When cls_meta_args_resolver is called with too few args or kwargs.
+    # When resolve_cls_meta_args is called with too few args or kwargs.
     with pytest.raises(TypeError) as exc:
-        tuple(instance._cls_meta_args_resolver(tuple(), dict()))
+        tuple(instance._resolve_cls_meta_args(tuple(), dict()))
 
     # Then exception has expected message.
     assert str(exc.value) == "Missing required argument: lastname"
-
-
-def test_given_instance_of_subclass_of_node_subclass_when_cls_meta_args_resolver_is_called_with_args_not_of_cls_args_annotation_then_exception_is_raised():
-    """Test given instance of subclass of node subclass when cls meta args resolver is called with args not of cls args annotation then exception is raised."""
-
-    # Given instance of subclass of Node subclass.
-    instance = Person()
-
-    # When cls_meta_args_resolver is called with arg not of cls_arg
-    # annotation.
-    with pytest.raises(TypeError) as exc:
-        tuple(instance._cls_meta_args_resolver((1,), dict()))
-
-    # Then exception has expected message.
-    assert (
-        str(exc.value)
-        == f"Expected argument of type {str} for {list(MOCK_NODE_CLS_ARGS)[0]}, got type {int}."
-    )
-
-
-def test_given_instance_of_subclass_of_node_subclass_when_cls_meta_args_resolver_is_called_with_kwargs_not_of_cls_args_annotation_then_exception_is_raised():
-    """Test given instance of subclass of node subclass when cls meta args resolver is called with kwargs not of cls args annotation then exception is raised."""
-
-    # Given instance of subclass of Node subclass.
-    instance = Person()
-
-    # When cls_meta_args_resolver is called with kwarg not of cls_arg
-    # annotation.
-    with pytest.raises(TypeError) as exc:
-        tuple(instance._cls_meta_args_resolver(tuple(), {"firstname": 1}))
-
-    # Then exception has expected message.
-    assert (
-        str(exc.value)
-        == f"Expected argument of type {str} for {list(MOCK_NODE_CLS_ARGS)[0]}, got type {int}."
-    )

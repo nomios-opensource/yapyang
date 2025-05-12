@@ -31,8 +31,8 @@ def test_given_init_node_subclass_when_instantiated_then_node_initializer_called
     node_init.assert_called()
 
 
-def test_given_init_node_subclass_when_instantiated_with_args_and_kwargs_then_cls_meta_args_resolver_yielded_cls_arg_value_pairs_are_set_as_attributes():
-    """Test given init node subclass when instantiated with args and kwargs then cls meta args resolver yielded cls arg value pairs are set as attributes."""
+def test_given_init_node_subclass_when_instantiated_with_args_and_kwargs_then_resolve_cls_meta_args_yielded_cls_arg_value_pairs_are_set_as_attributes():
+    """Test given init node subclass when instantiated with args and kwargs then resolve cls meta args yielded cls arg value pairs are set as attributes."""
 
     # Given args and kwargs.
     args = (1, 2, 3, 4, 5)
@@ -46,16 +46,16 @@ def test_given_init_node_subclass_when_instantiated_with_args_and_kwargs_then_cl
     mock_iterator = MagicMock()
     mock_iterator.__iter__.return_value = cls_arg_value_pairs
 
-    # Given Mock _cls_meta_args_resolver that returns Mock iterator
+    # Given Mock _resolve_cls_meta_args that returns Mock iterator
     # when called.
     mock = MagicMock(return_value=mock_iterator)
-    InitNodeSubclass._cls_meta_args_resolver = mock
+    InitNodeSubclass._resolve_cls_meta_args = mock
 
     # When instantiated with args and kwargs.
     instance = InitNodeSubclass(*args, **kwargs)
 
-    # Then Mock _cls_meta_args_resolver was called with args and kwargs.
-    InitNodeSubclass._cls_meta_args_resolver.assert_called_once_with(
+    # Then Mock _resolve_cls_meta_args was called with args and kwargs.
+    InitNodeSubclass._resolve_cls_meta_args.assert_called_once_with(
         args, kwargs
     )
 

@@ -76,7 +76,7 @@ class NodeMeta(type):
         namespace["__meta__"] = metadata
 
     @staticmethod
-    def _meta_checker(cls_name: str, bases: tuple, metadata: dict, /) -> None:
+    def _check_meta(cls_name: str, metadata: dict, /) -> None:
         """Ensures that YANG node is valid."""
 
         if cls_name in (
@@ -95,35 +95,11 @@ class NodeMeta(type):
         if IDENTIFIER not in metadata[DEFAULTS]:
             metadata[DEFAULTS][IDENTIFIER] = cls_name.lower()
 
-        NodeMeta._meta_default_checker(metadata)
-
-    @staticmethod
-    def _meta_default_checker(metadata: t.Dict[str, t.Any], /) -> None:
-        """Ensures that namespace metadata defaults are valid."""
-
-        for attr, default in metadata[DEFAULTS].items():
-            if attr in metadata:
-                if isinstance(default, MetaInfo):
-                    raise TypeError(
-                        f"MetaInfo cannot be used on metadata attributes: {attr}"
-                    )
-                annotation = metadata[attr]
-            elif attr in metadata[ARGS]:
-                if isinstance(default, MetaInfo):
-                    if (default := default.default) is UNSET:
-                        continue
-                annotation = metadata[ARGS][attr]
-
-            if (default_type := type(default)) is not annotation:
-                raise TypeError(
-                    f"Expected default of type {annotation} for {attr}, got type {default_type}."
-                )
-
     def __new__(cls, cls_name: str, bases: tuple, namespace: dict):
         """Constructs class namespace metadata, and creates class object."""
 
         cls._construct_meta(namespace, bases)
-        cls._meta_checker(cls_name, bases, namespace["__meta__"])
+        cls._check_meta(cls_name, namespace["__meta__"])
         return super().__new__(cls, cls_name, bases, namespace)
 
 
@@ -147,7 +123,7 @@ class Node(metaclass=NodeMeta):
             )
         return super().__new__(cls)
 
-    def _cls_meta_args_resolver(
+    def _resolve_cls_meta_args(
         self, args: tuple, kwargs: dict
     ) -> t.Generator[t.Tuple[str, t.Any], None, None]:
         """Yields the name and resolved value for each class meta
@@ -156,9 +132,7 @@ class Node(metaclass=NodeMeta):
         self._check_given_args_not_greater_than_expected(
             (len(args) + len(kwargs))
         )
-        for index, (cls_arg, annotation) in enumerate(
-            self._cls_meta[ARGS].items()
-        ):
+        for index, cls_arg in enumerate(self._cls_meta[ARGS]):
             value = UNSET
             if len(args) > index:
                 value = args[index]
@@ -172,11 +146,6 @@ class Node(metaclass=NodeMeta):
                     value = value.default
             if value is UNSET:
                 raise TypeError(f"Missing required argument: {cls_arg}")
-            if (value_type := type(value)) is not annotation:
-                # NOTE: Defaults are type checked twice.
-                raise TypeError(
-                    f"Expected argument of type {annotation} for {cls_arg}, got type {value_type}."
-                )
             yield (cls_arg, value)
 
     def _check_given_args_not_greater_than_expected(self, given: int) -> None:
@@ -197,7 +166,7 @@ class InitNode(Node):
         args."""
 
         super().__init__()
-        for cls_arg, value in self._cls_meta_args_resolver(args, kwargs):
+        for cls_arg, value in self._resolve_cls_meta_args(args, kwargs):
             setattr(self, cls_arg, value)
 
 
@@ -275,7 +244,7 @@ class ListNode(Node):
         """
 
         entry_attr: t.Dict[str, t.Any] = dict()
-        for cls_arg, value in self._cls_meta_args_resolver(args, kwargs):
+        for cls_arg, value in self._resolve_cls_meta_args(args, kwargs):
             entry_attr[cls_arg] = value
         self.entries.add(ListEntry(entry_attr, key=self._key))
 
@@ -314,7 +283,7 @@ class LeafListNode(Node):
         list entries.
         """
 
-        for _, value in self._cls_meta_args_resolver(value, dict()):
+        for _, value in self._resolve_cls_meta_args(value, dict()):
             self.entries.add(value)
 
     def to_xml(self, /, *, attrs: t.Optional[t.Dict[str, str]] = None) -> str:

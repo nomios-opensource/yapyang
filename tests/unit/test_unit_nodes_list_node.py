@@ -59,8 +59,8 @@ def test_given_list_node_subclass_when_instantiated_then_node_initializer_called
     node_init.assert_called()
 
 
-def test_given_instance_of_list_node_subclass_when_append_is_called_with_args_and_kwargs_then_cls_meta_args_resolver_yielded_cls_arg_value_pairs_are_set_as_attributes_of_new_list_entry():
-    """Test given instance of list node subclass when append is called with args and kwargs then cls meta args resolver yielded cls arg value pairs are set as attributes of new list entry."""
+def test_given_instance_of_list_node_subclass_when_append_is_called_with_args_and_kwargs_then_resolve_cls_meta_args_yielded_cls_arg_value_pairs_are_set_as_attributes_of_new_list_entry():
+    """Test given instance of list node subclass when append is called with args and kwargs then resolve cls meta args yielded cls arg value pairs are set as attributes of new list entry."""
 
     # Given args and kwargs.
     args = (1, 2, 3, 4, 5)
@@ -77,10 +77,10 @@ def test_given_instance_of_list_node_subclass_when_append_is_called_with_args_an
     mock_iterator = MagicMock()
     mock_iterator.__iter__.return_value = cls_arg_value_pairs
 
-    # Given Mock _cls_meta_args_resolver that returns Mock iterator
+    # Given Mock _resolve_cls_meta_args that returns Mock iterator
     # when called.
     mock = MagicMock(return_value=mock_iterator)
-    ListNodeSubclass._cls_meta_args_resolver = mock
+    ListNodeSubclass._resolve_cls_meta_args = mock
 
     # Given instance of ListNode subclass.
     instance = ListNodeSubclass()
@@ -88,8 +88,8 @@ def test_given_instance_of_list_node_subclass_when_append_is_called_with_args_an
     # When append is called with args and kwargs.
     instance.append(*args, **kwargs)
 
-    # Then Mock _cls_meta_args_resolver was called with args and kwargs.
-    ListNodeSubclass._cls_meta_args_resolver.assert_called_once_with(
+    # Then Mock _resolve_cls_meta_args was called with args and kwargs.
+    ListNodeSubclass._resolve_cls_meta_args.assert_called_once_with(
         args, kwargs
     )
 

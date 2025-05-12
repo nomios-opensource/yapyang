@@ -41,8 +41,8 @@ def test_given_leaf_list_node_subclass_when_instantiated_then_node_initializer_c
     node_init.assert_called()
 
 
-def test_given_instance_of_leaf_list_node_subclass_when_append_is_called_with_value_then_cls_meta_args_resolver_yielded_value_is_added_to_entries():
-    """Test given instance of leaf list node subclass when append is called with value then cls meta args resolver yielded value is added to entries."""
+def test_given_instance_of_leaf_list_node_subclass_when_append_is_called_with_value_then_resolve_cls_meta_args_yielded_value_is_added_to_entries():
+    """Test given instance of leaf list node subclass when append is called with value then resolve cls meta args yielded value is added to entries."""
 
     # Given value.
     value = ("mock_value",)
@@ -55,10 +55,10 @@ def test_given_instance_of_leaf_list_node_subclass_when_append_is_called_with_va
     mock_iterator = MagicMock()
     mock_iterator.__iter__.return_value = cls_arg_value_pairs
 
-    # Given Mock _cls_meta_args_resolver that returns Mock iterator
+    # Given Mock _resolve_cls_meta_args that returns Mock iterator
     # when called.
     mock = MagicMock(return_value=mock_iterator)
-    LeafListNodeSubclass._cls_meta_args_resolver = mock
+    LeafListNodeSubclass._resolve_cls_meta_args = mock
 
     # Given instance of LeafListNode subclass.
     instance = LeafListNodeSubclass()
@@ -66,8 +66,8 @@ def test_given_instance_of_leaf_list_node_subclass_when_append_is_called_with_va
     # When append is called with value.
     instance.append(*value)
 
-    # Then Mock _cls_meta_args_resolver was called with value.
-    LeafListNodeSubclass._cls_meta_args_resolver.assert_called_once_with(
+    # Then Mock _resolve_cls_meta_args was called with value.
+    LeafListNodeSubclass._resolve_cls_meta_args.assert_called_once_with(
         value, dict()
     )
 
