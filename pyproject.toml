@@ -9,7 +9,7 @@ repository = "https://github.com/nomios-opensource/yapyang"
 documentation = "https://nomios-opensource.github.io/yapyang"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 ordered-set = "^4.1.0"
 
 [tool.poetry.group.dev.dependencies]
