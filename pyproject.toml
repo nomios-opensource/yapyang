@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "yapyang"
-version = "0.1.0"
+version = "0.2.0"
 description = "An open source Python package that helps developers to translate YANG (RFC6020/RFC7950) data models to Python."
 authors = ["a.faria <antonio.faria@nomios.co.uk>"]
 license = "Apache License 2.0"
