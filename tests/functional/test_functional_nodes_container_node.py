@@ -109,7 +109,7 @@ def test_given_instance_of_container_node_subclass_with_child_nodes_given_child_
 def test_given_instance_of_container_node_subclass_with_union_typed_child_field_when_to_xml_is_called_then_only_selected_child_serialized():
     """Test given instance of container node subclass with Union-typed child field when to xml is called then only selected child serialized."""
 
-    # Given instance of ContainerNode subclass with child nodes.
+    # Given instance of ContainerNode subclass with Union-typed child field.
 
     # When to_xml is called.
     xml_if = TestUnion(Interfaces()).to_xml()
