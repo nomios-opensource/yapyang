@@ -7,6 +7,7 @@ from yapyang import ContainerNode, ListNode, LeafNode, MetaInfo
 
 class Name(LeafNode):
     __identifier__ = "name"
+
     value: str
 
 
@@ -36,6 +37,7 @@ class Bar(ContainerNode):
 
 class TestContainerUnion(ContainerNode):
     __identifier__ = "test-container-union"
+
     child: t.Union[Foo, Bar]
 
 
