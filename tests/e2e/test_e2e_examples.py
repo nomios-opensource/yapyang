@@ -1,6 +1,6 @@
 """This module contains end-to-end tests for examples."""
 
-from yapyang import LeafNode, ListNode, ContainerNode, ModuleNode
+from yapyang import *
 
 
 def test_given_openconfig_interfaces_yang_model_when_nodes_instantiated_altered_and_to_xml_is_called_then_xml_tree_returned():
